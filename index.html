@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Taller – Suma</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700;900&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f4efe8;--card:#fffdf9;--ink:#1c1917;--muted:#78716c;--line:#e7e0d5;--green:#166534;--green-bg:#dcfce7;--red:#991b1b;--red-bg:#fee2e2;--gold:#92400e;--gold-bg:#fef3c7;--blue:#1e40af;--blue-bg:#dbeafe;--tab-h:62px;--radius:16px}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;font-size:15px;padding-bottom:calc(var(--tab-h) + 8px)}
+h1,h2,h3{font-family:'Fraunces',serif;letter-spacing:-.3px;margin:0}
+.header{background:var(--ink);color:#fef9f0;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:200}
+.header-title{font-family:'Fraunces',serif;font-size:20px;font-weight:700;letter-spacing:-.3px}
+.header-sub{font-size:11px;color:#a8a29e;margin-top:2px;display:flex;align-items:center;gap:5px}
+.dot{width:7px;height:7px;border-radius:50%;background:#fbbf24;flex-shrink:0;transition:background .4s}
+.dot.ok{background:#4ade80}.dot.err{background:#f87171}
+.wrap{padding:14px;max-width:760px;margin:0 auto}
+.card{background:var(--card);border:1.5px solid var(--line);border-radius:var(--radius);padding:14px;margin-bottom:12px}
+.card h2{font-size:17px;margin-bottom:8px}
+.muted{color:var(--muted);font-size:13px;line-height:1.5}
+.row{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
+.row:last-child{border-bottom:none}
+.row .r{font-weight:700;white-space:nowrap}
+.pill{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;background:var(--blue-bg);color:var(--blue)}
+.pill.g{background:var(--green-bg);color:var(--green)}
+.pill.y{background:var(--gold-bg);color:var(--gold)}
+.empty{color:var(--muted);font-size:13px;padding:10px 0}
+.tabs{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1.5px solid var(--line);display:flex;height:var(--tab-h);z-index:200}
+.tab{flex:1;border:none;background:none;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;color:var(--muted);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;padding:0}
+.tab .ico{font-size:18px;line-height:1}
+.tab.on{color:var(--ink);font-weight:700}
+.tab.on .ico{transform:translateY(-1px)}
+#login{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:20px;z-index:500}
+#login .box{background:var(--card);border:1.5px solid var(--line);border-radius:var(--radius);padding:22px;width:100%;max-width:360px}
+#login h1{font-size:22px;margin-bottom:4px}
+#login p{color:var(--muted);font-size:13px;margin:0 0 16px}
+input{width:100%;padding:11px 12px;border:1.5px solid var(--line);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:15px;background:#fff;margin-bottom:10px;color:var(--ink)}
+button.primary{width:100%;padding:12px;border:none;border-radius:10px;background:var(--ink);color:#fef9f0;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;cursor:pointer}
+.glos{border-left:3px solid var(--line);padding-left:10px;margin-bottom:10px}
+.glos b{font-size:13px}
+.glos div{font-size:13px;color:var(--muted);line-height:1.45}
+</style>
+</head>
+<body>
+
+<div id="login">
+  <div class="box">
+    <h1>Taller · SUMA</h1>
+    <p>Inventario de materia prima y producción. Misma cuenta del financiero.</p>
+    <input id="mail" type="email" placeholder="correo" autocomplete="username">
+    <input id="pass" type="password" placeholder="contraseña" autocomplete="current-password">
+    <button class="primary" id="entrar">Entrar</button>
+    <div class="muted" id="loginMsg" style="margin-top:10px"></div>
+  </div>
+</div>
+
+<div id="app" hidden>
+  <div class="header">
+    <div>
+      <div class="header-title">Taller · SUMA</div>
+      <div class="header-sub"><span class="dot" id="dot"></span><span id="who">—</span></div>
+    </div>
+    <button class="tab" id="salir" style="width:auto;flex:none;color:#a8a29e;font-size:11px">Salir</button>
+  </div>
+
+  <div class="wrap">
+
+    <section id="v-capturar">
+      <div class="card">
+        <h2>Capturar</h2>
+        <div class="muted">Los formularios se montan sobre el <b>contrato de datos</b> y todavía está en revisión. Cuando lo apruebes, acá van la entrada de material, la salida a pieza y el gasto del taller, cada uno en tres toques desde el teléfono.</div>
+      </div>
+      <div class="card">
+        <h2>Mientras tanto</h2>
+        <div class="muted">Esta primera versión ya lee: los movimientos del taller, el kardex por material y las piezas. La guía explica qué es cada categoría y para qué sirve cada dato.</div>
+      </div>
+    </section>
+
+    <section id="v-movimientos" hidden>
+      <div class="card">
+        <h2>Movimientos del taller</h2>
+        <div class="muted">Los egresos con línea del taller, del libro general de SUMA.</div>
+        <div id="movs"></div>
+      </div>
+    </section>
+
+    <section id="v-kardex" hidden>
+      <div class="card">
+        <h2>Kardex por material</h2>
+        <div class="muted">Existencia teórica = entradas + recuperaciones − salidas − mermas ± ajustes.</div>
+        <div id="kardex"></div>
+      </div>
+    </section>
+
+    <section id="v-piezas" hidden>
+      <div class="card">
+        <h2>Piezas</h2>
+        <div id="piezas"></div>
+      </div>
+    </section>
+
+    <section id="v-guia" hidden>
+      <div class="card">
+        <h2>Categorías</h2>
+        <div class="glos"><b>J1 · Metal</b><div>Plata, oro, latón, cobre. Va en gramos y siempre a una pieza.</div></div>
+        <div class="glos"><b>J1 · Piedras y otros materiales</b><div>Piedras, perlas, cuero, madera. Lo que va montado en la pieza.</div></div>
+        <div class="glos"><b>J1 · Fundición</b><div>Lo que se paga por fundir. No es el metal: es el servicio.</div></div>
+        <div class="glos"><b>J1 · Modelado e impresión 3D</b><div>Resina, diseño o impresión de un modelo.</div></div>
+        <div class="glos"><b>J1 · Otros servicios de producción</b><div>Grabado, corte, baño, lo que se paga a un tercero por la pieza.</div></div>
+        <div class="glos"><b>J1 · Mano de obra externa</b><div>Un tercero que trabaja la pieza. Tu trabajo no se paga acá: se mide en horas.</div></div>
+        <div class="glos"><b>J · Insumos de mesa</b><div>Lo que se consume trabajando y no queda en la pieza: sueldas, ácidos, lijas, cera, discos, gas.</div></div>
+        <div class="glos"><b>J · Herramienta menor</b><div>Herramienta que se compra y se usa, sin ir a una pieza.</div></div>
+        <div class="glos"><b>J · Mantenimiento del taller</b><div>Reparar, afilar, mantener el taller andando.</div></div>
+        <div class="glos"><b>J2 · Material de clases</b><div>El material que se entrega en clase y no se le recarga al alumno.</div></div>
+      </div>
+      <div class="card">
+        <h2>Tres palabras</h2>
+        <div class="glos"><b>Destino</b><div>A qué pieza, clase o lote se le carga este gasto. Es lo que convierte un gasto en costo.</div></div>
+        <div class="glos"><b>Merma</b><div>El material que se pierde en el trabajo. Se mide para poder reducirla; hoy no se mide.</div></div>
+        <div class="glos"><b>Recuperación</b><div>El barrido que se funde y vuelve a ser material. No es merma ni es compra.</div></div>
+      </div>
+      <div class="card">
+        <h2>Las líneas</h2>
+        <div class="muted"><b>J1</b> · Joyería, piezas y encargos<br><b>J2</b> · Joyería, enseñanza<br><b>E1</b> · Escultura, platería y metalistería<br><b>J</b> · gasto del taller que sirve a las tres</div>
+      </div>
+      <div class="card">
+        <h2>La regla de oro</h2>
+        <div class="muted">No hay «Otro». Si un gasto no encaja en ninguna categoría, falta una categoría, y eso es un hallazgo, no un problema de captura.</div>
+      </div>
+    </section>
+
+  </div>
+
+  <div class="tabs">
+    <button class="tab on" data-v="capturar"><span class="ico">＋</span>Capturar</button>
+    <button class="tab" data-v="movimientos"><span class="ico">≡</span>Movimientos</button>
+    <button class="tab" data-v="kardex"><span class="ico">◍</span>Kardex</button>
+    <button class="tab" data-v="piezas"><span class="ico">◇</span>Piezas</button>
+    <button class="tab" data-v="guia"><span class="ico">?</span>Guía</button>
+  </div>
+</div>
+
+<script type="module">
+import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import{getFirestore,collection,onSnapshot,query,where}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import{getAuth,signInWithEmailAndPassword,signOut,onAuthStateChanged,setPersistence,browserLocalPersistence}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import{getStorage}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js';
+
+const firebaseConfig = {apiKey:"AIzaSyBvtANGNk5qaVXukcCf1EcsPQaQVGz23R8",authDomain:"suma-control-financiero.firebaseapp.com",projectId:"suma-control-financiero",storageBucket:"suma-control-financiero.firebasestorage.app",messagingSenderId:"241219659431",appId:"1:241219659431:web:f249431f61d878568b9d82"};
+const app=initializeApp(firebaseConfig),db=getFirestore(app),auth=getAuth(app),storage=getStorage(app);
+
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const money=n=>'$'+Number(n||0).toLocaleString('es-CO');
+const fecha=s=>{if(!s)return'';const d=new Date(s+'T12:00:00');return isNaN(d)?s:d.toLocaleDateString('es-CO',{day:'2-digit',month:'short',year:'2-digit'});};
+const gramos=n=>Number(n||0).toLocaleString('es-CO',{maximumFractionDigits:2})+' g';
+
+/* ---------- login ---------- */
+let loginTried=false;
+window.addEventListener('load',()=>{setPersistence(auth,browserLocalPersistence).catch(()=>{});});
+$('entrar').onclick=async()=>{
+  const email=$('mail').value.trim(),pass=$('pass').value;
+  if(!email||!pass){$('loginMsg').textContent='Correo y contraseña.';return;}
+  $('loginMsg').textContent='Entrando…';
+  try{await signInWithEmailAndPassword(auth,email,pass);}
+  catch(e){$('loginMsg').textContent='⚠ '+(e.code==='auth/invalid-credential'?'Correo o contraseña incorrectos.':e.message);}
+};
+$('salir').onclick=()=>signOut(auth);
+onAuthStateChanged(auth,user=>{
+  if(user){
+    $('login').style.display='none';$('app').hidden=false;
+    $('who').textContent=user.email;
+    initListeners();
+  }else{
+    $('login').style.display='flex';$('app').hidden=true;
+    $('pass').value='';
+    if(loginTried)$('loginMsg').textContent='';
+  }
+  loginTried=true;
+});
+
+/* ---------- pestañas ---------- */
+document.querySelectorAll('.tab[data-v]').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('.tab[data-v]').forEach(x=>x.classList.toggle('on',x===b));
+  ['capturar','movimientos','kardex','piezas','guia'].forEach(v=>$('v-'+v).hidden=(v!==b.dataset.v));
+  window.scrollTo(0,0);
+});
+
+/* ---------- datos ---------- */
+let started=false;
+const LINEAS=['J1','J2','E1','J'];
+function initListeners(){
+  if(started)return;started=true;
+  $('dot').className='dot';
+  try{
+    onSnapshot(collection(db,'records'),snap=>{
+      const rows=[];
+      snap.forEach(d=>{const r=d.data();if(!(r.linea&&LINEAS.includes(r.linea)))return;if(r.type!=='expense')return;rows.push(r);});
+      rows.sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+      $('movs').innerHTML=rows.length?rows.slice(0,60).map(r=>
+        `<div class="row"><div><div>${esc(r.description||r.category||'—')}</div><div class="muted">${fecha(r.date)} · ${esc(r.category||'')}${r.destino&&r.destino.codigo?' · '+esc(r.destino.codigo):''}</div></div><div class="r">${money(r.amount)}</div></div>`
+      ).join(''):'<div class="empty">Todavía no hay gastos del taller con línea. Aparecerán acá cuando la captura empiece a escribirlos.</div>';
+    },err=>{dot('err',err.message);});
+  }catch(e){dot('err',e.message);}
+
+  try{
+    onSnapshot(collection(db,'taller_material'),snap=>{
+      const m={};
+      snap.forEach(d=>{const x=d.data();const k=x.material||'—';m[k]=m[k]||{entrada:0,salida:0,merma:0,recuperacion:0,ajuste:0};
+        const g=Number(x.gramos||0);
+        if(x.tipo==='entrada')m[k].entrada+=g;else if(x.tipo==='salida')m[k].salida+=g;
+        else if(x.tipo==='merma')m[k].merma+=g;else if(x.tipo==='recuperacion')m[k].recuperacion+=g;
+        else if(x.tipo==='ajuste')m[k].ajuste+=g;});
+      const keys=Object.keys(m).sort();
+      $('kardex').innerHTML=keys.length?keys.map(k=>{const v=m[k];const saldo=v.entrada+v.recuperacion-v.salida-v.merma+v.ajuste;
+        return `<div class="row"><div><div>${esc(k)}</div><div class="muted">entradas ${gramos(v.entrada)} · a piezas ${gramos(v.salida)} · merma ${gramos(v.merma)} · recuperado ${gramos(v.recuperacion)}</div></div><div class="r">${gramos(saldo)}</div></div>`;
+      }).join(''):'<div class="empty">Sin movimientos de material todavía.</div>';
+    },err=>{dot('err',err.message);});
+  }catch(e){dot('err',e.message);}
+
+  try{
+    onSnapshot(collection(db,'taller_piezas'),snap=>{
+      const rows=[];snap.forEach(d=>rows.push(d.data()));
+      rows.sort((a,b)=>(b.codigo||'').localeCompare(a.codigo||''));
+      $('piezas').innerHTML=rows.length?rows.map(p=>
+        `<div class="row"><div><div>${esc(p.nombre||p.codigo||'—')}</div><div class="muted">${esc(p.codigo||'')} · ${esc(p.linea||'')} · ${esc(p.materialPrincipal||'')}</div></div><div class="r"><span class="pill ${p.estado==='vendida'?'g':(p.estado==='terminada'?'y':'')}">${esc(p.estado||'—')}</span></div></div>`
+      ).join(''):'<div class="empty">Sin piezas registradas todavía.</div>';
+    },err=>{dot('err',err.message);});
+  }catch(e){dot('err',e.message);}
+
+  dot('ok','conectado');
+}
+function dot(state,msg){$('dot').className='dot '+state;$('who').textContent=msg||'';}
+</script>
+</body>
+</html>
