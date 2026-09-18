@@ -1,1 +1,4 @@
-fin.html
+*
+!.gitignore
+!README.md
+!index.html
