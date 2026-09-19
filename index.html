@@ -182,6 +182,9 @@ button.ghost{background:none;border:1px dashed var(--line);border-radius:10px;co
         <div class="field"><label>Fecha</label><input type="date" id="k_fecha"></div>
         <div class="field"><label>Material</label><select id="k_material"></select></div>
         <div class="field"><label>Gramos contados</label><input type="text" inputmode="decimal" id="k_gramos" placeholder="0"></div>
+        <div class="field"><label>Precio del gramo <span class="hint" style="display:inline">(solo si el cajón todavía no tiene ninguno)</span></label>
+          <input type="text" inputmode="decimal" id="k_precio" placeholder="0">
+          <div class="hint" id="k_precio_hint">–</div></div>
         <div class="res" id="k_res">–</div>
         <div class="field"><label>Notas</label><input type="text" id="k_notas"></div>
         <button class="primary" id="k_guardar">Guardar conteo</button>
@@ -522,19 +525,24 @@ $("m_guardar").onclick=async()=>{
 
 /* ---------- guardar: conteo ---------- */
 function pintarResConteo(){const mat=$("k_material").value,g=num($("k_gramos").value);const teo=saldo(mat);const dif=g-teo;
+  const pr=precioRef(mat);
+  $("k_precio_hint").innerHTML=pr.p>0?`El cajón tiene referencia: <b>${money(pr.p)}</b> el gramo${pr.f?" ("+fecha(pr.f)+")":""}. Déjalo en blanco.`
+    :"El cajón no tiene ningún precio todavía. Escribe el que te den hoy: es el saldo de partida.";
   $("k_res").innerHTML=g>0||$("k_gramos").value!==""?`El kardex dice <b>${gramos(teo)}</b> · contados <b>${gramos(g)}</b> · diferencia <b>${gramos(dif)}</b>${dif<0?" (falta)":" (sobra)"}`:"–";}
 $("k_material").onchange=$("k_gramos").oninput=pintarResConteo;
 $("k_guardar").onclick=async()=>{
   const fechaV=$("k_fecha").value,mat=$("k_material").value,txt=$("k_gramos").value,g=num(txt);
   if(!fechaV||!mat||txt===""){toast("Faltan fecha, material o gramos");return;}
-  const teo=saldo(mat),dif=g-teo;
+  const teo=saldo(mat),dif=g-teo,pm=num($("k_precio").value);
+  const precioUsado=pm>0?pm:costoPromedio(mat);
   $("k_guardar").disabled=true;
   try{
-    const ref=await addDoc(collection(db,"taller_conteos"),{fecha:fechaV,material:mat,gramosContados:g,gramosTeoricos:teo,
-      estimado:true,notas:$("k_notas").value||"",updatedAt:new Date().toISOString()});
+    if(pm>0)await addDoc(collection(db,"taller_precios"),{fecha:fechaV,material:mat,precioPorGramo:pm,origen:"consulta",notas:"precio de arranque"});
+    const base=await addDoc(collection(db,"taller_conteos"),{fecha:fechaV,material:mat,gramosContados:g,gramosTeoricos:teo,
+      precioPorGramo:precioUsado,estimado:true,notas:$("k_notas").value||"",updatedAt:new Date().toISOString()});
     if(Math.abs(dif)>0.0001)await addDoc(collection(db,"taller_material"),{tipo:"ajuste",material:mat,gramos:dif,fecha:fechaV,
-      conteo:ref.id,precioRef:costoPromedio(mat),notas:"ajuste por conteo",updatedAt:new Date().toISOString()});
-    $("k_gramos").value="";$("k_notas").value="";$("k_res").innerHTML="–";toast("✓ Conteo guardado"+(Math.abs(dif)>0.0001?" con su ajuste":""));
+      conteo:base.id,precioRef:precioUsado,notas:"ajuste por conteo",updatedAt:new Date().toISOString()});
+    $("k_gramos").value="";$("k_precio").value="";$("k_notas").value="";$("k_res").innerHTML="–";toast("✓ Conteo guardado"+(Math.abs(dif)>0.0001?" con su ajuste":""));
   }catch(e){toast("⚠ "+e.message);}
   $("k_guardar").disabled=false;
 };
