@@ -89,6 +89,7 @@ button.ghost{background:none;border:1px dashed var(--line);border-radius:10px;co
         <button class="bt" data-f="horas">◷ Horas</button>
         <button class="bt" data-f="pieza">◇ Pieza</button>
         <button class="bt" data-f="merma">✕ Merma</button>
+        <button class="bt" data-f="gasto">$ Otro gasto</button>
         <button class="bt" data-f="conteo">⚖ Conteo</button>
       </div>
 
@@ -99,6 +100,7 @@ button.ghost{background:none;border:1px dashed var(--line);border-radius:10px;co
           <button class="ghost" data-add="materiales" type="button">Añadir material a la lista</button></div>
         <div class="row2">
           <div class="field"><label>Gramos</label><input type="text" inputmode="decimal" id="c_gramos" placeholder="0"></div>
+        <div class="hint">Los decimales van con coma: 0,125. Si escribes con punto, el punto separa miles.</div>
           <div class="field"><label>Total pagado</label><input type="text" inputmode="decimal" id="c_total" placeholder="0"></div>
         </div>
         <div class="res" id="c_res">Escribe gramos y total: el precio del gramo se calcula.</div>
@@ -117,6 +119,7 @@ button.ghost{background:none;border:1px dashed var(--line);border-radius:10px;co
           <div class="hint">Si la pieza no está, créala primero en <b>Pieza</b>.</div></div>
         <div class="field"><label>Material</label><select id="s_material"></select></div>
         <div class="field"><label>Gramos</label><input type="text" inputmode="decimal" id="s_gramos" placeholder="0"></div>
+        <div class="hint">Los decimales van con coma: 0,125. Si escribes con punto, el punto separa miles.</div>
         <div class="res" id="s_res">–</div>
         <div class="field"><label>Notas</label><input type="text" id="s_notas"></div>
         <button class="primary" id="s_guardar">Guardar salida</button>
@@ -170,6 +173,7 @@ button.ghost{background:none;border:1px dashed var(--line);border-radius:10px;co
         <div class="field"><label>Material</label><select id="m_material"></select></div>
         <div class="row2">
           <div class="field"><label>Gramos</label><input type="text" inputmode="decimal" id="m_gramos" placeholder="0"></div>
+        <div class="hint">Los decimales van con coma: 0,125. Si escribes con punto, el punto separa miles.</div>
           <div class="field"><label>Causa</label><select id="m_causa"></select></div>
         </div>
         <div class="field"><label>Pieza <span class="hint" style="display:inline">(si se sabe)</span></label><select id="m_pieza"></select></div>
@@ -177,11 +181,32 @@ button.ghost{background:none;border:1px dashed var(--line);border-radius:10px;co
         <button class="primary" id="m_guardar">Guardar merma</button>
       </div>
 
+      <div class="card form" id="f-gasto" hidden>
+        <h2>Otro gasto del taller</h2>
+        <div class="field"><label>Fecha</label><input type="date" id="g_fecha"></div>
+        <div class="field"><label>Categoría</label><select id="g_categoria"></select>
+          <div class="hint" id="g_linea_hint">–</div></div>
+        <div class="field" id="g_dest_wrap">
+          <label>Destino</label>
+          <select id="g_dest_tipo"><option value="pieza">Una pieza</option><option value="material">El material del cajón</option><option value="clase">Una clase</option></select>
+          <select id="g_dest_cod" style="margin-top:8px"></select>
+          <div class="hint">Un costo directo sin destino es un costo que no se le puede cobrar a nada.</div>
+        </div>
+        <div class="field"><label>Monto</label><input type="text" inputmode="decimal" id="g_monto" placeholder="0"></div>
+        <div class="field"><label>Proveedor</label><select id="g_proveedor"></select>
+          <button class="ghost" data-add="proveedores" type="button">Añadir proveedor</button></div>
+        <div class="field"><label>Método</label><select id="g_metodo"></select></div>
+        <div class="field"><label>Notas</label><input type="text" id="g_notas"></div>
+        <div class="field"><label>Comprobante</label><input type="file" accept="image/*" capture="environment" id="g_foto"><div class="thumbs" id="g_thumbs"></div></div>
+        <button class="primary" id="g_guardar">Guardar gasto</button>
+      </div>
+
       <div class="card form" id="f-conteo" hidden>
         <h2>Conteo del cajón</h2>
         <div class="field"><label>Fecha</label><input type="date" id="k_fecha"></div>
         <div class="field"><label>Material</label><select id="k_material"></select></div>
         <div class="field"><label>Gramos contados</label><input type="text" inputmode="decimal" id="k_gramos" placeholder="0"></div>
+        <div class="hint">Los decimales van con coma: 0,125. Si escribes con punto, el punto separa miles.</div>
         <div class="field"><label>Precio del gramo <span class="hint" style="display:inline">(solo si el cajón todavía no tiene ninguno)</span></label>
           <input type="text" inputmode="decimal" id="k_precio" placeholder="0">
           <div class="hint" id="k_precio_hint">–</div></div>
@@ -258,7 +283,7 @@ button.ghost{background:none;border:1px dashed var(--line);border-radius:10px;co
 
 <script type="module">
 import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import{getFirestore,collection,doc,addDoc,setDoc,updateDoc,onSnapshot}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import{getFirestore,collection,doc,addDoc,setDoc,updateDoc,onSnapshot,writeBatch}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 import{getAuth,signInWithEmailAndPassword,signOut,onAuthStateChanged,setPersistence,browserLocalPersistence}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 import{getStorage,ref as sRef,uploadBytesResumable,getDownloadURL}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js';
 
@@ -302,9 +327,10 @@ function fill(sel,items,val,lab){const s=$(sel);if(!s)return;const prev=s.value;
 
 /* ---------- cálculos del kardex ---------- */
 const esEntrada=m=>m.tipo==="entrada"||m.tipo==="recuperacion";
+const sumaAlPromedio=m=>{const g=Number(m.gramos)||0;return esEntrada(m)||(m.tipo==="ajuste"&&g>0);};
 function saldo(cod){let s=0;D.material.forEach(m=>{if(m.material!==cod)return;const g=Number(m.gramos)||0;
   if(esEntrada(m))s+=g;else if(m.tipo==="salida"||m.tipo==="merma")s-=g;else if(m.tipo==="ajuste")s+=g;});return s;}
-function costoPromedio(cod){let g=0,v=0;D.material.forEach(m=>{if(m.material!==cod||!esEntrada(m))return;const gg=Number(m.gramos)||0;const p=Number(m.precioRef)||0;g+=gg;v+=gg*p;});return g>0?v/g:0;}
+function costoPromedio(cod,hasta){let g=0,v=0;D.material.forEach(m=>{if(m.material!==cod)return;if(hasta&&(m.fecha||"")>hasta)return;if(!sumaAlPromedio(m))return;const gg=Number(m.gramos)||0;const p=Number(m.precioRef)||0;g+=gg;v+=gg*p;});return g>0?v/g:0;}
 function precioRef(cod){const ps=D.precios.filter(p=>p.material===cod&&(p.origen==="compra"||p.origen==="consulta")).sort((a,b)=>(b.fecha||"").localeCompare(a.fecha||""));if(ps.length)return {p:Number(ps[0].precioPorGramo)||0,f:ps[0].fecha,o:ps[0].origen};const c=costoPromedio(cod);return {p:c,f:null,o:"costo promedio"};}
 function costoDirectoDe(cod){return D.records.filter(r=>r.type==="expense"&&r.destino&&r.destino.tipo==="pieza"&&r.destino.codigo===cod).reduce((a,r)=>a+(Number(r.amount)||0),0);}
 function gramosDe(cod){return D.material.filter(m=>m.tipo==="salida"&&m.destino&&m.destino.tipo==="pieza"&&m.destino.codigo===cod).reduce((a,m)=>a+(Number(m.gramos)||0),0);}
@@ -362,6 +388,10 @@ function pintar(){
   fill("h_persona",D.personas,o=>o.nombre||o.id,o=>o.nombre||o.id);
   fill("p_cliente",D.personas,o=>o.nombre||o.id,o=>o.nombre||o.id);
   fill("c_metodo",METODOS);
+  fill("g_metodo",METODOS);
+  fill("g_categoria",CATS.map(c=>c.c));
+  fill("g_proveedor",D.proveedores,o=>o.nombre||o.id,o=>o.nombre||o.id);
+  if($("g_categoria"))pintarDestinoGasto();
   fill("m_causa",CAUSAS);
   const pz=D.piezas.filter(p=>!vendida(p)&&p.estado!=="descartada");
   fill("s_pieza",pz,o=>o.codigo,o=>o.codigo+" · "+(o.nombre||""));
@@ -406,20 +436,65 @@ document.querySelectorAll(".tab[data-v]").forEach(b=>b.onclick=()=>{
 document.querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>{
   const cual=b.dataset.f;
   document.querySelectorAll("[data-f]").forEach(x=>x.classList.toggle("on",x===b));
-  ["compra","salida","horas","pieza","merma","conteo"].forEach(f=>$("f-"+f).hidden=(f!==cual));
+  ["compra","salida","horas","pieza","merma","gasto","conteo"].forEach(f=>$("f-"+f).hidden=(f!==cual));
   formAbierto=cual;window.scrollTo({top:0,behavior:"smooth"});
 });
 
+/* ---------- otro gasto del taller ---------- */
+const CATS=[
+ {c:"J1 · Piedras y otros materiales",l:"J1",d:1},
+ {c:"J1 · Fundición",l:"J1",d:1},
+ {c:"J1 · Modelado e impresión 3D",l:"J1",d:1},
+ {c:"J1 · Otros servicios de producción",l:"J1",d:1},
+ {c:"J1 · Mano de obra externa",l:"J1",d:1},
+ {c:"J · Insumos de mesa",l:"J",d:0},
+ {c:"J · Herramienta menor",l:"J",d:0},
+ {c:"J · Mantenimiento del taller",l:"J",d:0},
+ {c:"J2 · Material de clases",l:"J2",d:2}
+];
+function pintarDestinoGasto(){
+  const cat=CATS.find(x=>x.c===$("g_categoria").value)||CATS[0];
+  $("g_linea_hint").textContent="Línea "+cat.l+(cat.d===1?" · exige destino":(cat.d===2?" · destino: la clase":" · sin destino, es gasto del taller"));
+  $("g_dest_wrap").hidden=(cat.d===0);
+  if(cat.d===0)return;
+  $("g_dest_tipo").hidden=(cat.d===2);
+  if(cat.d===2){$("g_dest_tipo").value="clase";fill("g_dest_cod",D.clases,o=>o.codigo,o=>o.codigo+" · "+(o.nombre||""));return;}
+  const tipo=$("g_dest_tipo").value;
+  if(tipo==="material")fill("g_dest_cod",D.materiales,o=>o.codigo,o=>o.nombre);
+  else fill("g_dest_cod",D.piezas.filter(p=>!vendida(p)&&p.estado!=="descartada"),o=>o.codigo,o=>o.codigo+" · "+(o.nombre||""));
+}
+if($("g_categoria")){$("g_categoria").onchange=pintarDestinoGasto;$("g_dest_tipo").onchange=pintarDestinoGasto;
+  $("g_foto").onchange=ev=>subirFoto(ev,"g");}
+$("g_guardar").onclick=async()=>{
+  const fechaV=$("g_fecha").value,cat=CATS.find(x=>x.c===$("g_categoria").value)||CATS[0],monto=num($("g_monto").value);
+  if(!fechaV||monto<=0){toast("Faltan fecha o monto");return;}
+  let destino=null;
+  if(cat.d===1){const tipo=$("g_dest_tipo").value,cod=$("g_dest_cod").value;if(!cod){toast("Este gasto exige destino");return;}destino={tipo,codigo:cod};}
+  if(cat.d===2){const cod=$("g_dest_cod").value;if(!cod){toast("Elige la clase");return;}destino={tipo:"clase",codigo:cod};}
+  $("g_guardar").disabled=true;
+  try{
+    await addDoc(collection(db,"records"),{type:"expense",date:fechaV,quantity:1,amount:monto,unidad:"unidad",
+      category:cat.c,linea:cat.l,destino,supplier:$("g_proveedor").value,person:"",method:$("g_metodo").value||"Efectivo",
+      status:"Pagado",ambito:"Suma",description:$("g_notas").value||cat.c,tags:"taller",
+      attachments:adj.gasto?[adj.gasto]:[],updatedAt:new Date().toISOString()});
+    adj.gasto=null;$("g_thumbs").innerHTML="";$("g_monto").value="";$("g_notas").value="";toast("✓ Gasto guardado");
+  }catch(e){toast("⚠ "+e.message);}
+  $("g_guardar").disabled=false;
+};
+
 /* ---------- fotos ---------- */
-const adj={foto:null,subiendo:false};
+const adj={foto:null,gasto:null,subiendo:false};
 function comprimir(file){return new Promise(res=>{const img=new Image(),fr=new FileReader();
   fr.onload=()=>{img.onload=()=>{const mx=1400;let w=img.width,h=img.height;if(w>h&&w>mx){h=Math.round(h*mx/w);w=mx;}else if(h>mx){w=Math.round(w*mx/h);h=mx;}
     const c=document.createElement("canvas");c.width=w;c.height=h;c.getContext("2d").drawImage(img,0,0,w,h);c.toBlob(b=>res(b),"image/jpeg",0.72);};img.src=fr.result;};fr.readAsDataURL(file);});}
-$("c_foto").onchange=async ev=>{const f=ev.target.files[0];if(!f)return;ev.target.value="";$("c_thumbs").innerHTML='<div class="hint">comprimiendo…</div>';
+async function subirFoto(ev,prefijo){
+  const f=ev.target.files[0];if(!f)return;ev.target.value="";
+  const thumbs=prefijo+"_thumbs";$(thumbs).innerHTML='<div class="hint">comprimiendo…</div>';
   try{const blob=await comprimir(f);const path=`comprobantes-taller/${Date.now()}-${Math.random().toString(36).slice(2,8)}.jpg`;
     const url=await new Promise((res,rej)=>{const t=uploadBytesResumable(sRef(storage,path),blob,{contentType:"image/jpeg"});t.on("state_changed",null,rej,async()=>res(await getDownloadURL(t.snapshot.ref)));});
-    adj.foto={url,path,name:f.name};$("c_thumbs").innerHTML=`<img src="${esc(url)}">`;}
-  catch(e){$("c_thumbs").innerHTML='<div class="hint" style="color:#991b1b">No subió: '+esc(e.message)+"</div>";}};
+    adj[prefijo==="c"?"foto":"gasto"]={url,path,name:f.name};$(thumbs).innerHTML=`<img src="${esc(url)}">`;}
+  catch(e){$(thumbs).innerHTML='<div class="hint" style="color:#991b1b">No subió: '+esc(e.message)+"</div>";}}
+$("c_foto").onchange=ev=>subirFoto(ev,"c");
 
 /* ---------- guardar: compra de material ---------- */
 $("c_gramos").oninput=$("c_total").oninput=()=>{const g=num($("c_gramos").value),t=num($("c_total").value);
@@ -434,10 +509,13 @@ $("c_guardar").onclick=async()=>{
     const rec={type:"expense",date:fechaV,quantity:g,unitAmount:pg,amount:t,unidad:"g",category:"J1 · Metal",linea:"J1",
       destino:{tipo:"material",codigo:mat},supplier:prov,person:"",method:met,status:"Pagado",ambito:"Suma",
       description:`Compra de ${nombreMat}${notas?" — "+notas:""}`,tags:"taller, material",attachments:adj.foto?[adj.foto]:[],updatedAt:new Date().toISOString()};
-    const ref=await addDoc(collection(db,"records"),rec);
-    await addDoc(collection(db,"taller_material"),{tipo:"entrada",material:mat,gramos:g,fecha:fechaV,precioRef:pg,
-      proveedor:prov,recordId:ref.id,notas,updatedAt:new Date().toISOString()});
-    await addDoc(collection(db,"taller_precios"),{fecha:fechaV,material:mat,precioPorGramo:pg,origen:"compra",recordId:ref.id});
+    const lote=writeBatch(db);
+    const refCaja=doc(collection(db,"records"));
+    lote.set(refCaja,rec);
+    lote.set(doc(collection(db,"taller_material")),{tipo:"entrada",material:mat,gramos:g,fecha:fechaV,precioRef:pg,
+      proveedor:prov,recordId:refCaja.id,notas,updatedAt:new Date().toISOString()});
+    lote.set(doc(collection(db,"taller_precios")),{fecha:fechaV,material:mat,precioPorGramo:pg,origen:"compra",recordId:refCaja.id});
+    await lote.commit();
     adj.foto=null;$("c_thumbs").innerHTML="";$("c_gramos").value="";$("c_total").value="";$("c_notas").value="";$("c_res").innerHTML="–";
     toast("✓ Compra guardada: egreso y entrada");
   }catch(e){toast("⚠ "+e.message);}
@@ -446,14 +524,14 @@ $("c_guardar").onclick=async()=>{
 
 /* ---------- guardar: salida a pieza ---------- */
 function pintarResSalida(){const mat=$("s_material").value,g=num($("s_gramos").value),cod=$("s_pieza").value;
-  const cp=costoPromedio(mat);
+  const cp=costoPromedio(mat,$("s_fecha").value);
   $("s_res").innerHTML=g>0?`Se valora a <b>${money(cp)}</b> el gramo (costo promedio del cajón): <b>${money(g*cp)}</b>${cod?` para ${esc(cod)}`:""}. Quedan ${gramos(saldo(mat))} en el cajón.`:"Escribe los gramos.";}
 $("s_material").onchange=$("s_gramos").oninput=$("s_pieza").onchange=pintarResSalida;
 $("s_guardar").onclick=async()=>{
   const fechaV=$("s_fecha").value,mat=$("s_material").value,g=num($("s_gramos").value),cod=$("s_pieza").value;
   if(!fechaV||!mat||g<=0||!cod){toast("Faltan fecha, pieza, material o gramos");return;}
   if(g>saldo(mat)&&!confirm(`Solo hay ${gramos(saldo(mat))} de ese material en el cajón. ¿Guardar de todos modos?`))return;
-  const cp=costoPromedio(mat);$("s_guardar").disabled=true;
+  const cp=costoPromedio(mat,fechaV);$("s_guardar").disabled=true;
   try{await addDoc(collection(db,"taller_material"),{tipo:"salida",material:mat,gramos:g,fecha:fechaV,precioRef:cp,
       destino:{tipo:"pieza",codigo:cod},notas:$("s_notas").value,updatedAt:new Date().toISOString()});
     $("s_gramos").value="";$("s_notas").value="";$("s_res").innerHTML="–";toast("✓ Salida guardada");
@@ -493,8 +571,9 @@ $("p_guardar").onclick=async()=>{
   const cod=($("p_codigo").value||"").trim(),lin=$("p_linea").value,nom=$("p_nombre").value.trim(),mat=$("p_material").value,est=$("p_estado").value;
   if(!cod||!nom){toast("Faltan código y nombre");return;}
   const precio=num($("p_precio").value);
+  const seleccion=$("p_existente").value;
+  if(!seleccion&&D.piezas.some(p=>p.codigo===cod)){toast("Ese código ya existe: elige la pieza en la lista de arriba para editarla");return;}
   const existente=D.piezas.find(p=>p.codigo===cod);
-  if(!existente&&D.piezas.some(p=>p.codigo===cod)){toast("Ese código ya existe");return;}
   const base={nombre:nom,linea:lin,materialPrincipal:mat,estado:est,cliente:$("p_cliente").value||"",encargo:$("p_encargo").value||"",
     notas:$("p_notas").value||"",updatedAt:new Date().toISOString()};
   $("p_guardar").disabled=true;
@@ -502,10 +581,23 @@ $("p_guardar").onclick=async()=>{
     let hist=existente&&Array.isArray(existente.precioVitrina)?existente.precioVitrina.slice():[];
     if(precio>0&&(!hist.length||Number(hist[hist.length-1].precio)!==precio))hist.push({fecha:hoy(),precio});
     base.precioVitrina=hist;
-    if(est==="en vitrina"&&!base.fechaEntrega)base.fechaEntrega=hoy();
-    if(est==="terminada"&&!(existente&&existente.cierre))base.cierre={fecha:hoy(),costo:costoDe(cod),gramos:gramosDe(cod),horas:horasDe(cod),promedioUsado:costoPromedio(mat)};
+    if(est==="en vitrina"&&!(existente&&existente.fechaEntrega))base.fechaEntrega=hoy();
+    if((est==="terminada"||est==="en vitrina")&&!(existente&&existente.cierre))
+      base.cierre={fecha:hoy(),costo:costoDe(cod),gramos:gramosDe(cod),horas:horasDe(cod),promedioUsado:costoPromedio(mat)};
     if(existente)await updateDoc(doc(db,"taller_piezas",cod),base);
     else await setDoc(doc(db,"taller_piezas",cod),{...base,creado:new Date().toISOString(),precioVitrina:hist});
+    if(est==="descartada"&&!(existente&&existente.estado==="descartada")){
+      const porMaterial={};
+      D.material.filter(m=>m.tipo==="salida"&&m.destino&&m.destino.codigo===cod).forEach(m=>{
+        const g=Number(m.gramos)||0,p=Number(m.precioRef)||0;
+        porMaterial[m.material]=porMaterial[m.material]||{g:0,v:0};porMaterial[m.material].g+=g;porMaterial[m.material].v+=g*p;});
+      const lote=writeBatch(db);
+      Object.keys(porMaterial).forEach(ma=>{const x=porMaterial[ma];if(x.g<=0)return;
+        lote.set(doc(collection(db,"taller_material")),{tipo:"recuperacion",material:ma,gramos:x.g,fecha:hoy(),
+          precioRef:x.v/x.g,origen:"pieza descartada",destino:{tipo:"pieza",codigo:cod},
+          notas:"metal devuelto por pieza descartada",updatedAt:new Date().toISOString()});});
+      await lote.commit();
+    }
     $("p_res").innerHTML="Guardada.";toast(existente?"✓ Pieza actualizada":"✓ Pieza creada");
   }catch(e){toast("⚠ "+e.message);}
   $("p_guardar").disabled=false;
@@ -537,7 +629,13 @@ $("k_guardar").onclick=async()=>{
   const precioUsado=pm>0?pm:costoPromedio(mat);
   $("k_guardar").disabled=true;
   try{
-    if(pm>0)await addDoc(collection(db,"taller_precios"),{fecha:fechaV,material:mat,precioPorGramo:pm,origen:"consulta",notas:"precio de arranque"});
+    if(pm>0){
+      await addDoc(collection(db,"taller_precios"),{fecha:fechaV,material:mat,precioPorGramo:pm,origen:"consulta",notas:"precio de arranque"});
+      // Ningun movimiento que meta material vale cero: si el arranque quedo sin precio, se corrige con este.
+      for(const m of D.material.filter(x=>x.material===mat&&sumaAlPromedio(x)&&!(Number(x.precioRef)>0))){
+        await updateDoc(doc(db,"taller_material",m.id),{precioRef:pm,corregido:new Date().toISOString()});
+      }
+    }
     const base=await addDoc(collection(db,"taller_conteos"),{fecha:fechaV,material:mat,gramosContados:g,gramosTeoricos:teo,
       precioPorGramo:precioUsado,estimado:true,notas:$("k_notas").value||"",updatedAt:new Date().toISOString()});
     if(Math.abs(dif)>0.0001)await addDoc(collection(db,"taller_material"),{tipo:"ajuste",material:mat,gramos:dif,fecha:fechaV,
@@ -563,7 +661,7 @@ document.querySelectorAll("[data-add]").forEach(b=>b.onclick=async()=>{
 });
 
 /* ---------- fechas por defecto ---------- */
-["c_fecha","s_fecha","h_fecha","m_fecha","k_fecha"].forEach(id=>$(id).value=hoy());
+["c_fecha","s_fecha","h_fecha","m_fecha","g_fecha","k_fecha"].forEach(id=>$(id).value=hoy());
 $("p_codigo").value=proximoCodigo("J1");
 document.documentElement.dataset.taller='listo';
 </script>
