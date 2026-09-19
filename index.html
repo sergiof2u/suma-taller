@@ -433,11 +433,16 @@ document.querySelectorAll(".tab[data-v]").forEach(b=>b.onclick=()=>{
   ["capturar","movimientos","kardex","piezas","guia"].forEach(v=>$("v-"+v).hidden=(v!==b.dataset.v));
   window.scrollTo(0,0);
 });
-document.querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>{
-  const cual=b.dataset.f;
-  document.querySelectorAll("[data-f]").forEach(x=>x.classList.toggle("on",x===b));
+const PRIMER_FORM="compra";
+function abrirFormulario(cual){
+  document.querySelectorAll("[data-f]").forEach(x=>x.classList.toggle("on",x.dataset.f===cual));
   ["compra","salida","horas","pieza","merma","gasto","conteo"].forEach(f=>$("f-"+f).hidden=(f!==cual));
-  formAbierto=cual;window.scrollTo({top:0,behavior:"smooth"});
+  formAbierto=cual;
+}
+abrirFormulario(PRIMER_FORM);
+document.querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>{
+  abrirFormulario(b.dataset.f);
+  window.scrollTo({top:0,behavior:"smooth"});
 });
 
 /* ---------- otro gasto del taller ---------- */
