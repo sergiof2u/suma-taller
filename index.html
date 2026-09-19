@@ -10,97 +10,202 @@
 :root{--bg:#f4efe8;--card:#fffdf9;--ink:#1c1917;--muted:#78716c;--line:#e7e0d5;--green:#166534;--green-bg:#dcfce7;--red:#991b1b;--red-bg:#fee2e2;--gold:#92400e;--gold-bg:#fef3c7;--blue:#1e40af;--blue-bg:#dbeafe;--tab-h:62px;--radius:16px}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;font-size:15px;padding-bottom:calc(var(--tab-h) + 8px)}
-h1,h2,h3{font-family:'Fraunces',serif;letter-spacing:-.3px;margin:0}
 .header{background:var(--ink);color:#fef9f0;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:200}
 .header-title{font-family:'Fraunces',serif;font-size:20px;font-weight:700;letter-spacing:-.3px}
 .header-sub{font-size:11px;color:#a8a29e;margin-top:2px;display:flex;align-items:center;gap:5px}
-.dot{width:7px;height:7px;border-radius:50%;background:#fbbf24;flex-shrink:0;transition:background .4s}
-.dot.ok{background:#4ade80}.dot.err{background:#f87171}
-.wrap{padding:14px;max-width:760px;margin:0 auto}
-.card{background:var(--card);border:1.5px solid var(--line);border-radius:var(--radius);padding:14px;margin-bottom:12px}
-.card h2{font-size:17px;margin-bottom:8px}
-.muted{color:var(--muted);font-size:13px;line-height:1.5}
-.row{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
-.row:last-child{border-bottom:none}
-.row .r{font-weight:700;white-space:nowrap}
-.pill{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;background:var(--blue-bg);color:var(--blue)}
-.pill.g{background:var(--green-bg);color:var(--green)}
-.pill.y{background:var(--gold-bg);color:var(--gold)}
-.empty{color:var(--muted);font-size:13px;padding:10px 0}
-.tabs{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1.5px solid var(--line);display:flex;height:var(--tab-h);z-index:200}
-.tab{flex:1;border:none;background:none;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;color:var(--muted);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;padding:0}
-.tab .ico{font-size:18px;line-height:1}
+.dot{width:7px;height:7px;border-radius:50%;background:#4ade80;flex-shrink:0;transition:background .4s}
+.dot.err{background:#f87171}.dot.warn{background:#fbbf24}
+.tabs{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1.5px solid var(--line);display:flex;height:var(--tab-h);z-index:300}
+.tab{flex:1;border:0;background:none;font:inherit;font-size:10px;color:var(--muted);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;padding:4px}
+.tab .ico{font-size:17px}
 .tab.on{color:var(--ink);font-weight:700}
-.tab.on .ico{transform:translateY(-1px)}
-#login{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:20px;z-index:500}
-#login .box{background:var(--card);border:1.5px solid var(--line);border-radius:var(--radius);padding:22px;width:100%;max-width:360px}
-#login h1{font-size:22px;margin-bottom:4px}
-#login p{color:var(--muted);font-size:13px;margin:0 0 16px}
-input{width:100%;padding:11px 12px;border:1.5px solid var(--line);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:15px;background:#fff;margin-bottom:10px;color:var(--ink)}
-button.primary{width:100%;padding:12px;border:none;border-radius:10px;background:var(--ink);color:#fef9f0;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;cursor:pointer}
-.glos{border-left:3px solid var(--line);padding-left:10px;margin-bottom:10px}
+.wrap{padding:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px;margin-bottom:12px}
+.card h2{font-family:'Fraunces',serif;font-size:16px;margin:0 0 10px;font-weight:700}
+.gl{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:6px;margin-bottom:12px}
+.bt{border:1px solid var(--line);background:var(--card);border-radius:12px;padding:9px 6px;font:inherit;font-size:12px;cursor:pointer;color:var(--ink)}
+.bt.on{background:var(--ink);color:#fef9f0;border-color:var(--ink);font-weight:700}
+.field{margin-bottom:10px}
+.field label{display:block;font-size:11px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px}
+.field input,.field select,.field textarea{width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;font:inherit;background:#fff;color:var(--ink)}
+.field textarea{min-height:56px;resize:vertical}
+.field .hint{font-size:11px;color:var(--muted);margin-top:3px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+button.primary{width:100%;padding:13px;border:0;border-radius:12px;background:var(--ink);color:#fef9f0;font:inherit;font-weight:700;cursor:pointer;margin-top:4px}
+button.primary:disabled{opacity:.5}
+button.ghost{background:none;border:1px dashed var(--line);border-radius:10px;color:var(--muted);font:inherit;font-size:12px;padding:8px;cursor:pointer;width:100%}
+.item{border-bottom:1px solid var(--line);padding:10px 0}
+.item:last-child{border-bottom:0}
+.item .t{font-weight:500}
+.item .m{font-size:12px;color:var(--muted);margin-top:2px}
+.item .r{text-align:right;font-variant-numeric:tabular-nums;font-weight:700}
+.item .row{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.empty{color:var(--muted);font-size:13px;padding:14px 4px;text-align:center}
+.glos{margin-bottom:8px}
 .glos b{font-size:13px}
-.glos div{font-size:13px;color:var(--muted);line-height:1.45}
+.glos div{font-size:12px;color:var(--muted);margin-top:1px}
+.tag{display:inline-block;font-size:10px;padding:2px 7px;border-radius:99px;background:var(--line);color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+.tag.ok{background:var(--green-bg);color:var(--green)}
+.tag.warn{background:var(--gold-bg);color:var(--gold)}
+.tag.err{background:var(--red-bg);color:var(--red)}
+.res{border:1px dashed var(--line);border-radius:10px;padding:10px;font-size:13px;margin-bottom:10px;background:#fffdf9}
+.res b{font-family:'Fraunces',serif}
+#login{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:20px;z-index:500}
+#login .card{width:100%;max-width:360px}
+.thumbs{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.thumbs img{width:56px;height:56px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--tab-h) + 14px);background:var(--ink);color:#fef9f0;padding:10px 14px;border-radius:99px;font-size:13px;opacity:0;transition:opacity .25s;z-index:400;pointer-events:none;max-width:90vw;text-align:center}
+#toast.show{opacity:1}
 </style>
 </head>
 <body>
 
 <div id="login">
-  <div class="box">
-    <h1>Taller · SUMA</h1>
-    <p>Inventario de materia prima y producción. Misma cuenta del financiero.</p>
-    <input id="mail" type="email" placeholder="correo" autocomplete="username">
-    <input id="pass" type="password" placeholder="contraseña" autocomplete="current-password">
+  <div class="card">
+    <h2>Taller – Suma</h2>
+    <div class="field"><label>Correo</label><input id="mail" type="email" autocapitalize="off" autocorrect="off"></div>
+    <div class="field"><label>Contraseña</label><input id="pass" type="password"></div>
     <button class="primary" id="entrar">Entrar</button>
-    <div class="muted" id="loginMsg" style="margin-top:10px"></div>
+    <div class="hint" id="loginMsg" style="color:var(--red);font-size:12px;margin-top:8px"></div>
   </div>
 </div>
 
 <div id="app" hidden>
   <div class="header">
     <div>
-      <div class="header-title">Taller · SUMA</div>
-      <div class="header-sub"><span class="dot" id="dot"></span><span id="who">—</span></div>
+      <div class="header-title">Taller</div>
+      <div class="header-sub"><span class="dot" id="dot"></span><span id="who">–</span></div>
     </div>
-    <button class="tab" id="salir" style="width:auto;flex:none;color:#a8a29e;font-size:11px">Salir</button>
+    <button class="bt" id="salir" style="background:transparent;color:#fef9f0;border-color:#44403c">Salir</button>
   </div>
 
   <div class="wrap">
 
+    <!-- ============ CAPTURAR ============ -->
     <section id="v-capturar">
-      <div class="card">
-        <h2>Capturar</h2>
-        <div class="muted">Los formularios se montan sobre el <b>contrato de datos</b> y todavía está en revisión. Cuando lo apruebes, acá van la entrada de material, la salida a pieza y el gasto del taller, cada uno en tres toques desde el teléfono.</div>
+      <div class="gl">
+        <button class="bt" data-f="compra">＋ Compra de material</button>
+        <button class="bt" data-f="salida">→ Salida a pieza</button>
+        <button class="bt" data-f="horas">◷ Horas</button>
+        <button class="bt" data-f="pieza">◇ Pieza</button>
+        <button class="bt" data-f="merma">✕ Merma</button>
+        <button class="bt" data-f="conteo">⚖ Conteo</button>
       </div>
-      <div class="card">
-        <h2>Mientras tanto</h2>
-        <div class="muted">Esta primera versión ya lee: los movimientos del taller, el kardex por material y las piezas. La guía explica qué es cada categoría y para qué sirve cada dato.</div>
+
+      <div class="card form" id="f-compra" hidden>
+        <h2>Compra de material</h2>
+        <div class="field"><label>Fecha</label><input type="date" id="c_fecha"></div>
+        <div class="field"><label>Material</label><select id="c_material"></select>
+          <button class="ghost" data-add="materiales" type="button">Añadir material a la lista</button></div>
+        <div class="row2">
+          <div class="field"><label>Gramos</label><input type="text" inputmode="decimal" id="c_gramos" placeholder="0"></div>
+          <div class="field"><label>Total pagado</label><input type="text" inputmode="decimal" id="c_total" placeholder="0"></div>
+        </div>
+        <div class="res" id="c_res">Escribe gramos y total: el precio del gramo se calcula.</div>
+        <div class="field"><label>Proveedor</label><select id="c_proveedor"></select>
+          <button class="ghost" data-add="proveedores" type="button">Añadir proveedor</button></div>
+        <div class="field"><label>Método</label><select id="c_metodo"></select></div>
+        <div class="field"><label>Notas</label><input type="text" id="c_notas" placeholder="factura, ley, lo que haga falta"></div>
+        <div class="field"><label>Comprobante</label><input type="file" accept="image/*" capture="environment" id="c_foto"><div class="thumbs" id="c_thumbs"></div></div>
+        <button class="primary" id="c_guardar">Guardar compra</button>
+      </div>
+
+      <div class="card form" id="f-salida" hidden>
+        <h2>Salida de material a una pieza</h2>
+        <div class="field"><label>Fecha</label><input type="date" id="s_fecha"></div>
+        <div class="field"><label>Pieza</label><select id="s_pieza"></select>
+          <div class="hint">Si la pieza no está, créala primero en <b>Pieza</b>.</div></div>
+        <div class="field"><label>Material</label><select id="s_material"></select></div>
+        <div class="field"><label>Gramos</label><input type="text" inputmode="decimal" id="s_gramos" placeholder="0"></div>
+        <div class="res" id="s_res">–</div>
+        <div class="field"><label>Notas</label><input type="text" id="s_notas"></div>
+        <button class="primary" id="s_guardar">Guardar salida</button>
+      </div>
+
+      <div class="card form" id="f-horas" hidden>
+        <h2>Horas de trabajo</h2>
+        <div class="field"><label>Fecha</label><input type="date" id="h_fecha"></div>
+        <div class="row2">
+          <div class="field"><label>Persona</label><select id="h_persona"></select></div>
+          <div class="field"><label>Horas</label><input type="text" inputmode="decimal" id="h_horas" placeholder="0"></div>
+        </div>
+        <button class="ghost" data-add="personas" type="button" style="margin-bottom:10px">Añadir persona</button>
+        <div class="field"><label>Línea</label><select id="h_linea"><option value="J1">J1 · piezas y encargos</option><option value="J2">J2 · enseñanza</option><option value="E1">E1 · escultura y platería</option></select></div>
+        <div class="field"><label>Destino</label>
+          <select id="h_destino_tipo"><option value="pieza">Una pieza</option><option value="clase">Una clase</option></select></div>
+        <div class="field" id="h_pieza_wrap"><label>Pieza</label><select id="h_pieza"></select></div>
+        <div class="field" id="h_clase_wrap" hidden><label>Clase</label><select id="h_clase"></select>
+          <button class="ghost" data-add="clases" type="button">Añadir clase (código y nombre)</button></div>
+        <div class="field"><label>Tipo</label><select id="h_tipo"><option value="produccion">Producción</option><option value="enseñanza">Enseñanza</option></select></div>
+        <div class="field"><label>Notas</label><input type="text" id="h_notas"></div>
+        <button class="primary" id="h_guardar">Guardar horas</button>
+      </div>
+
+      <div class="card form" id="f-pieza" hidden>
+        <h2>Pieza</h2>
+        <div class="field"><label>Pieza existente</label><select id="p_existente"><option value="">— nueva pieza —</option></select></div>
+        <div class="row2">
+          <div class="field"><label>Código</label><input type="text" id="p_codigo"></div>
+          <div class="field"><label>Línea</label><select id="p_linea"><option value="J1">J1 · joyería</option><option value="E1">E1 · escultura y platería</option></select></div>
+        </div>
+        <div class="field"><label>Nombre</label><input type="text" id="p_nombre" placeholder="anillo, aretes, colgante…"></div>
+        <div class="field"><label>Material principal</label><select id="p_material"></select></div>
+        <div class="field"><label>Estado</label><select id="p_estado">
+          <option value="en proceso">en proceso</option><option value="terminada">terminada</option>
+          <option value="en vitrina">en vitrina</option><option value="retirada">retirada</option>
+          <option value="descartada">descartada</option></select></div>
+        <div class="row2">
+          <div class="field"><label>Precio de vitrina</label><input type="text" inputmode="decimal" id="p_precio" placeholder="0"></div>
+          <div class="field"><label>Cliente</label><select id="p_cliente"></select></div>
+        </div>
+        <button class="ghost" data-add="personas" type="button" style="margin-bottom:10px">Añadir persona</button>
+        <div class="field"><label>Encargo</label><input type="text" id="p_encargo" list="lista_encargos" placeholder="nombre de la nota del encargo, si es un encargo"><datalist id="lista_encargos"></datalist></div>
+        <div class="field"><label>Notas</label><input type="text" id="p_notas"></div>
+        <div class="res" id="p_res">–</div>
+        <button class="primary" id="p_guardar">Guardar pieza</button>
+      </div>
+
+      <div class="card form" id="f-merma" hidden>
+        <h2>Merma</h2>
+        <div class="field"><label>Fecha</label><input type="date" id="m_fecha"></div>
+        <div class="field"><label>Material</label><select id="m_material"></select></div>
+        <div class="row2">
+          <div class="field"><label>Gramos</label><input type="text" inputmode="decimal" id="m_gramos" placeholder="0"></div>
+          <div class="field"><label>Causa</label><select id="m_causa"></select></div>
+        </div>
+        <div class="field"><label>Pieza <span class="hint" style="display:inline">(si se sabe)</span></label><select id="m_pieza"></select></div>
+        <div class="field"><label>Notas</label><input type="text" id="m_notas"></div>
+        <button class="primary" id="m_guardar">Guardar merma</button>
+      </div>
+
+      <div class="card form" id="f-conteo" hidden>
+        <h2>Conteo del cajón</h2>
+        <div class="field"><label>Fecha</label><input type="date" id="k_fecha"></div>
+        <div class="field"><label>Material</label><select id="k_material"></select></div>
+        <div class="field"><label>Gramos contados</label><input type="text" inputmode="decimal" id="k_gramos" placeholder="0"></div>
+        <div class="res" id="k_res">–</div>
+        <div class="field"><label>Notas</label><input type="text" id="k_notas"></div>
+        <button class="primary" id="k_guardar">Guardar conteo</button>
       </div>
     </section>
 
+    <!-- ============ MOVIMIENTOS ============ -->
     <section id="v-movimientos" hidden>
-      <div class="card">
-        <h2>Movimientos del taller</h2>
-        <div class="muted">Los egresos con línea del taller, del libro general de SUMA.</div>
-        <div id="movs"></div>
-      </div>
+      <div class="card"><h2>Egresos del taller</h2><div id="movs"><div class="empty">Todavía no hay registros.</div></div></div>
     </section>
 
+    <!-- ============ KARDEX ============ -->
     <section id="v-kardex" hidden>
-      <div class="card">
-        <h2>Kardex por material</h2>
-        <div class="muted">Existencia teórica = entradas + recuperaciones − salidas − mermas ± ajustes.</div>
-        <div id="kardex"></div>
-      </div>
+      <div class="card"><h2>El cajón</h2><div id="kardex"><div class="empty">Sin movimientos de material todavía.</div></div></div>
+      <div class="card"><h2>Movimientos de material</h2><div id="kmovs"><div class="empty">Sin movimientos.</div></div></div>
     </section>
 
+    <!-- ============ PIEZAS ============ -->
     <section id="v-piezas" hidden>
-      <div class="card">
-        <h2>Piezas</h2>
-        <div id="piezas"></div>
-      </div>
+      <div class="card"><h2>Piezas</h2><div id="piezas"><div class="empty">Todavía no hay piezas.</div></div></div>
     </section>
 
+    <!-- ============ GUIA ============ -->
     <section id="v-guia" hidden>
       <div class="card">
         <h2>Categorías</h2>
@@ -118,7 +223,7 @@ button.primary{width:100%;padding:12px;border:none;border-radius:10px;background
       <div class="card">
         <h2>Cuatro palabras</h2>
         <div class="glos"><b>Destino</b><div>A qué se carga: a una pieza, al material del cajón o a una clase. Es lo que convierte un gasto en costo.</div></div>
-        <div class="glos"><b>Merma</b><div>El material que se pierde en el trabajo. Se mide para poder reducirla; hoy no se mide.</div></div>
+        <div class="glos"><b>Merma</b><div>El material que se pierde en el trabajo, con causa. Se mide para poder reducirla; hoy no se mide.</div></div>
         <div class="glos"><b>Recuperación</b><div>El barrido que se funde y vuelve a ser material. No es merma ni es compra.</div></div>
         <div class="glos"><b>Aleación</b><div>Plata fina más liga para hacer 925: salen unos materiales y entra otro. No es una pérdida.</div></div>
       </div>
@@ -128,7 +233,7 @@ button.primary{width:100%;padding:12px;border:none;border-radius:10px;background
       </div>
       <div class="card">
         <h2>El ciclo de la pieza</h2>
-        <div class="muted"><b>En proceso</b> → <b>Terminada</b> → <b>En vitrina</b> → <b>Vendida</b>.<br>También puede <b>retirarse</b> de la vitrina sin venderse, o <b>descartarse</b> devolviendo sus gramos al kardex.<br>El código de la pieza es lo que la une con su venta: el precio de venta es el del registro de caja, no un dato aparte.</div>
+        <div class="muted"><b>En proceso</b> → <b>Terminada</b> → <b>En vitrina</b> → <b>Vendida</b>. También puede <b>retirarse</b> de la vitrina sin venderse, o <b>descartarse</b> devolviendo sus gramos al kardex. El código de la pieza es lo que la une con su venta.</div>
       </div>
       <div class="card">
         <h2>La regla de oro</h2>
@@ -147,97 +252,312 @@ button.primary{width:100%;padding:12px;border:none;border-radius:10px;background
   </div>
 </div>
 
+<div id="toast"></div>
+
 <script type="module">
 import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import{getFirestore,collection,onSnapshot,query,where}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import{getFirestore,collection,doc,addDoc,setDoc,updateDoc,onSnapshot}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 import{getAuth,signInWithEmailAndPassword,signOut,onAuthStateChanged,setPersistence,browserLocalPersistence}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-import{getStorage}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js';
+import{getStorage,ref as sRef,uploadBytesResumable,getDownloadURL}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js';
 
 const firebaseConfig = {apiKey:"AIzaSyBvtANGNk5qaVXukcCf1EcsPQaQVGz23R8",authDomain:"suma-control-financiero.firebaseapp.com",projectId:"suma-control-financiero",storageBucket:"suma-control-financiero.firebasestorage.app",messagingSenderId:"241219659431",appId:"1:241219659431:web:f249431f61d878568b9d82"};
 const app=initializeApp(firebaseConfig),db=getFirestore(app),auth=getAuth(app),storage=getStorage(app);
-
 const $=id=>document.getElementById(id);
-const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const money=n=>'$'+Number(n||0).toLocaleString('es-CO');
-const fecha=s=>{if(!s)return'';const d=new Date(s+'T12:00:00');return isNaN(d)?s:d.toLocaleDateString('es-CO',{day:'2-digit',month:'short',year:'2-digit'});};
-const gramos=n=>Number(n||0).toLocaleString('es-CO',{maximumFractionDigits:2})+' g';
+
+/* ---------- listas heredadas y propias ---------- */
+const METODOS=["Efectivo","Transferencia","Tarjeta","Nequi","Daviplata","Pasarela","Cheque"];
+const CAUSAS=["pulido","limado","fundición","corte","soldadura","contaminación"];
+const LINEAS=["J1","J2","E1","J"];
+const MATERIALES_DEF=[
+ {codigo:"plata-925",nombre:"Plata 925",metalBase:"plata",pureza:0.925},
+ {codigo:"plata-950",nombre:"Plata 950",metalBase:"plata",pureza:0.950},
+ {codigo:"plata-fina",nombre:"Plata fina",metalBase:"plata",pureza:0.999},
+ {codigo:"liga-cobre",nombre:"Liga de cobre",metalBase:"cobre",pureza:1},
+ {codigo:"oro-amarillo-18k",nombre:"Oro amarillo 18k",metalBase:"oro",pureza:0.750},
+ {codigo:"oro-blanco-18k",nombre:"Oro blanco 18k",metalBase:"oro",pureza:0.750},
+ {codigo:"oro-rosa-18k",nombre:"Oro rosa 18k",metalBase:"oro",pureza:0.750},
+ {codigo:"oro-fino",nombre:"Oro fino",metalBase:"oro",pureza:0.999},
+ {codigo:"laton",nombre:"Latón",metalBase:"cobre",pureza:1},
+ {codigo:"cobre",nombre:"Cobre",metalBase:"cobre",pureza:1},
+ {codigo:"bronce",nombre:"Bronce",metalBase:"cobre",pureza:1},
+ {codigo:"alpaca",nombre:"Alpaca",metalBase:"cobre",pureza:1}
+];
+
+/* ---------- estado ---------- */
+let D={records:[],material:[],piezas:[],horas:[],conteos:[],precios:[],materiales:[],proveedores:[],personas:[],clases:[]};
+let roto=false,sembrado=false;
+
+/* ---------- utilidades ---------- */
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const money=n=>"$"+(Number(n)||0).toLocaleString("es-CO",{maximumFractionDigits:0});
+const gramos=n=>(Number(n)||0).toLocaleString("es-CO",{maximumFractionDigits:2})+" g";
+const hoy=()=>new Date().toLocaleDateString("sv-SE");
+const fecha=d=>{if(!d)return"";const [a,m,x]=d.split("-");return x+"/"+m+"/"+a.slice(2);};
+const num=t=>{const s=String(t||"").replace(/[^0-9.,-]/g,"").replace(/\.(?=\d{3}\b)/g,"").replace(",",".");const n=Number(s);return isFinite(n)?n:0;};
+function toast(m){const t=$("toast");t.textContent=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2600);}
+function dot(s,m){$("dot").className="dot "+(s||"");if(m!==undefined)$("who").textContent=m;}
+function fill(sel,items,val,lab){const s=$(sel);if(!s)return;const prev=s.value;s.innerHTML=items.map(o=>{const v=val?val(o):o;const l=lab?lab(o):o;return `<option value="${esc(v)}">${esc(l)}</option>`}).join("");if(prev&&items.some(o=>(val?val(o):o)===prev))s.value=prev;}
+
+/* ---------- cálculos del kardex ---------- */
+const esEntrada=m=>m.tipo==="entrada"||m.tipo==="recuperacion";
+function saldo(cod){let s=0;D.material.forEach(m=>{if(m.material!==cod)return;const g=Number(m.gramos)||0;
+  if(esEntrada(m))s+=g;else if(m.tipo==="salida"||m.tipo==="merma")s-=g;else if(m.tipo==="ajuste")s+=g;});return s;}
+function costoPromedio(cod){let g=0,v=0;D.material.forEach(m=>{if(m.material!==cod||!esEntrada(m))return;const gg=Number(m.gramos)||0;const p=Number(m.precioRef)||0;g+=gg;v+=gg*p;});return g>0?v/g:0;}
+function precioRef(cod){const ps=D.precios.filter(p=>p.material===cod&&(p.origen==="compra"||p.origen==="consulta")).sort((a,b)=>(b.fecha||"").localeCompare(a.fecha||""));if(ps.length)return {p:Number(ps[0].precioPorGramo)||0,f:ps[0].fecha,o:ps[0].origen};const c=costoPromedio(cod);return {p:c,f:null,o:"costo promedio"};}
+function costoDirectoDe(cod){return D.records.filter(r=>r.type==="expense"&&r.destino&&r.destino.tipo==="pieza"&&r.destino.codigo===cod).reduce((a,r)=>a+(Number(r.amount)||0),0);}
+function gramosDe(cod){return D.material.filter(m=>m.tipo==="salida"&&m.destino&&m.destino.tipo==="pieza"&&m.destino.codigo===cod).reduce((a,m)=>a+(Number(m.gramos)||0),0);}
+function valorMetalDe(cod){return D.material.filter(m=>m.tipo==="salida"&&m.destino&&m.destino.tipo==="pieza"&&m.destino.codigo===cod).reduce((a,m)=>a+(Number(m.gramos)||0)*(Number(m.precioRef)||0),0);}
+function horasDe(cod){return D.horas.filter(h=>h.destino&&h.destino.codigo===cod).reduce((a,h)=>a+(Number(h.horas)||0),0);}
+function costoDe(cod){return costoDirectoDe(cod)+valorMetalDe(cod);}
+function vendida(p){return !!(p.venta&&p.venta.recordId);}
+function ingresoDe(p){return D.records.find(r=>r.id===(p.venta&&p.venta.recordId));}
 
 /* ---------- login ---------- */
-let loginTried=false;
-window.addEventListener('load',()=>{setPersistence(auth,browserLocalPersistence).catch(()=>{});});
-$('entrar').onclick=async()=>{
-  const email=$('mail').value.trim(),pass=$('pass').value;
-  if(!email||!pass){$('loginMsg').textContent='Correo y contraseña.';return;}
-  $('loginMsg').textContent='Entrando…';
-  try{await signInWithEmailAndPassword(auth,email,pass);}
-  catch(e){$('loginMsg').textContent='⚠ '+(e.code==='auth/invalid-credential'?'Correo o contraseña incorrectos.':e.message);}
-};
-$('salir').onclick=()=>signOut(auth);
-onAuthStateChanged(auth,user=>{
-  if(user){
-    $('login').style.display='none';$('app').hidden=false;
-    $('who').textContent=user.email;
-    initListeners();
-  }else{
-    $('login').style.display='flex';$('app').hidden=true;
-    $('pass').value='';
-    if(loginTried)$('loginMsg').textContent='';
-  }
-  loginTried=true;
+setPersistence(auth,browserLocalPersistence).catch(()=>{});
+$("entrar").onclick=async()=>{const m=$("mail").value.trim(),p=$("pass").value;if(!m||!p){$("loginMsg").textContent="Correo y contraseña.";return;}
+  try{$("loginMsg").textContent="";await signInWithEmailAndPassword(auth,m,p);}catch(e){$("loginMsg").textContent="No entró: "+e.code;}};
+$("salir").onclick=()=>signOut(auth);
+onAuthStateChanged(auth,u=>{
+  if(u){$("login").style.display="none";$("app").hidden=false;$("who").textContent=u.email;$("pass").value="";init();}
+  else{$("login").style.display="flex";$("app").hidden=true;$("who").textContent="–";}
 });
 
-/* ---------- pestañas ---------- */
-document.querySelectorAll('.tab[data-v]').forEach(b=>b.onclick=()=>{
-  document.querySelectorAll('.tab[data-v]').forEach(x=>x.classList.toggle('on',x===b));
-  ['capturar','movimientos','kardex','piezas','guia'].forEach(v=>$('v-'+v).hidden=(v!==b.dataset.v));
+/* ---------- escuchar ---------- */
+let escuchando=false;
+function init(){
+  if(escuchando)return;escuchando=true;
+  const K=(col)=>"taller_"+col;
+  const mirar=(col,llave,orden)=>{try{onSnapshot(collection(db,K(col)),s=>{
+      const arr=[];s.forEach(d=>arr.push({id:d.id,...d.data()}));
+      if(orden)arr.sort(orden);D[llave]=arr;if(col==="materiales"&&!arr.length&&!sembrado){sembrado=true;sembrar();}pintar();
+    },e=>{roto=true;dot("err",e.code||"error");});}catch(e){dot("err",e.message);}};
+  try{
+    onSnapshot(collection(db,"records"),s=>{const a=[];s.forEach(d=>a.push({id:d.id,...d.data()}));D.records=a;pintar();},e=>{roto=true;dot("err",e.code);});
+    mirar("material","material",(a,b)=>(b.fecha||"").localeCompare(a.fecha||""));
+    mirar("piezas","piezas",(a,b)=>(b.codigo||"").localeCompare(a.codigo||""));
+    mirar("horas","horas",(a,b)=>(b.fecha||"").localeCompare(a.fecha||""));
+    mirar("conteos","conteos");
+    mirar("precios","precios",(a,b)=>(b.fecha||"").localeCompare(a.fecha||""));
+    mirar("materiales","materiales");
+    mirar("proveedores","proveedores");
+    mirar("personas","personas");
+    mirar("clases","clases");
+    dot("ok","conectado");
+  }catch(e){dot("err",e.message);}
+}
+async function sembrar(){
+  try{for(const m of MATERIALES_DEF)await setDoc(doc(db,"taller_materiales",m.codigo),m);toast("Lista de materiales creada");}
+  catch(e){toast("⚠ "+e.message);}
+}
+
+/* ---------- pintar ---------- */
+let formAbierto=null;
+function pintar(){
+  if(!escuchando)return;
+    ["c_material","s_material","m_material","k_material"].forEach(id=>fill(id,D.materiales,o=>o.codigo,o=>o.nombre));
+  fill("p_material",D.materiales,o=>o.codigo,o=>o.nombre);
+  fill("c_proveedor",D.proveedores,o=>o.nombre||o.id,o=>o.nombre||o.id);
+  fill("h_persona",D.personas,o=>o.nombre||o.id,o=>o.nombre||o.id);
+  fill("p_cliente",D.personas,o=>o.nombre||o.id,o=>o.nombre||o.id);
+  fill("c_metodo",METODOS);
+  fill("m_causa",CAUSAS);
+  const pz=D.piezas.filter(p=>!vendida(p)&&p.estado!=="descartada");
+  fill("s_pieza",pz,o=>o.codigo,o=>o.codigo+" · "+(o.nombre||""));
+  fill("h_pieza",pz,o=>o.codigo,o=>o.codigo+" · "+(o.nombre||""));
+  fill("m_pieza",[{codigo:"",nombre:"—"}].concat(pz),o=>o.codigo,o=>o.codigo?o.codigo+" · "+(o.nombre||""):"—");
+  fill("h_clase",D.clases,o=>o.codigo,o=>o.codigo+" · "+(o.nombre||""));
+  fill("p_existente",[{codigo:"",nombre:""}].concat(D.piezas),o=>o.codigo,o=>o.codigo?o.codigo+" · "+(o.nombre||""):"— nueva pieza —");
+  const dl=$("lista_encargos");if(dl)dl.innerHTML=[...new Set(D.piezas.map(p=>p.encargo).filter(Boolean))].map(e=>`<option value="${esc(e)}">`).join("");
+
+  /* caja */
+  const rr=D.records.filter(r=>r.linea&&LINEAS.includes(r.linea)&&r.type==="expense").sort((a,b)=>(b.date||"").localeCompare(a.date||""));
+  $("movs").innerHTML=rr.length?rr.slice(0,80).map(r=>`<div class="item"><div class="row"><div><div class="t">${esc(r.description||r.category||"—")}</div><div class="m">${fecha(r.date)} · ${esc(r.category||"")}${r.destino&&r.destino.codigo?" · "+esc(r.destino.codigo):""}</div></div><div class="r">${money(r.amount)}</div></div></div>`).join(""):'<div class="empty">Todavía no hay egresos del taller.</div>';
+
+  /* kardex */
+  const mats=D.materiales.map(m=>m.codigo);
+  const conMov=[...new Set(D.material.map(m=>m.material))].filter(Boolean);
+  const lista=mats.filter(c=>conMov.includes(c)||saldo(c)!==0);
+  $("kardex").innerHTML=lista.length?lista.map(c=>{const m=D.materiales.find(x=>x.codigo===c)||{nombre:c};const s=saldo(c);const cp=costoPromedio(c);const pr=precioRef(c);
+    return `<div class="item"><div class="row"><div><div class="t">${esc(m.nombre||c)}</div><div class="m">${gramos(s)} en el cajón · costo promedio ${money(cp)}/g</div><div class="m">a reposición: <b>${money(s*pr.p)}</b> (${money(pr.p)}/g${pr.f?", "+fecha(pr.f)+" "+esc(pr.o):", "+esc(pr.o)})</div></div><div class="r">${money(s*cp)}</div></div></div>`}).join(""):'<div class="empty">Sin movimientos de material todavía.</div>';
+
+  const kk=D.material.slice().sort((a,b)=>(b.fecha||"").localeCompare(a.fecha||""));
+  $("kmovs").innerHTML=kk.length?kk.slice(0,60).map(m=>{const mat=D.materiales.find(x=>x.codigo===m.material)||{nombre:m.material};
+    const et={entrada:"entrada",salida:"a pieza",merma:"merma",recuperacion:"recuperación",ajuste:"ajuste"}[m.tipo]||m.tipo;
+    const signo=(m.tipo==="salida"||m.tipo==="merma")?"−":"+";
+    return `<div class="item"><div class="row"><div><div class="t">${esc(mat.nombre||m.material)} <span class="tag">${et}</span></div><div class="m">${fecha(m.fecha)}${m.destino&&m.destino.codigo?" · "+esc(m.destino.codigo):""}${m.causa?" · "+esc(m.causa):""}${m.precioRef?" · "+money(m.precioRef)+"/g":""}</div></div><div class="r">${signo}${gramos(Math.abs(Number(m.gramos)||0))}</div></div></div>`}).join(""):'<div class="empty">Sin movimientos.</div>';
+
+  /* piezas */
+  $("piezas").innerHTML=D.piezas.length?D.piezas.map(p=>{const v=vendida(p);const ing=ingresoDe(p);const costo=(p.cierre&&p.cierre.costo)?p.cierre.costo:costoDe(p.codigo);
+    const est=v?"vendida":(p.estado||"en proceso");
+    const ingreso=ing?(Number(ing.amount)||0):null;
+    return `<div class="item"><div class="row"><div><div class="t">${esc(p.codigo||"")} · ${esc(p.nombre||"")}</div>
+      <div class="m"><span class="tag ${v?"ok":(p.estado==="descartada"?"err":"")}">${esc(est)}</span> ${esc(p.linea||"")}${p.cliente?" · "+esc(p.cliente):""}</div>
+      <div class="m">${gramos(gramosDe(p.codigo))} · costo ${money(costo)}${p.cierre?" (cerrado)":""}${horasDe(p.codigo)?" · "+horasDe(p.codigo)+" h":""}</div>
+      ${ingreso!=null?`<div class="m">venta ${money(ingreso)} · margen ${money(ingreso-costo)}</div>`:""}
+      ${p.precioVitrina&&p.precioVitrina.length?`<div class="m">vitrina ${money(p.precioVitrina[p.precioVitrina.length-1].precio)}</div>`:""}</div></div></div>`}).join(""):'<div class="empty">Todavía no hay piezas.</div>';
+}
+document.querySelectorAll(".tab[data-v]").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll(".tab[data-v]").forEach(x=>x.classList.toggle("on",x===b));
+  ["capturar","movimientos","kardex","piezas","guia"].forEach(v=>$("v-"+v).hidden=(v!==b.dataset.v));
   window.scrollTo(0,0);
 });
+document.querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>{
+  const cual=b.dataset.f;
+  document.querySelectorAll("[data-f]").forEach(x=>x.classList.toggle("on",x===b));
+  ["compra","salida","horas","pieza","merma","conteo"].forEach(f=>$("f-"+f).hidden=(f!==cual));
+  formAbierto=cual;window.scrollTo({top:0,behavior:"smooth"});
+});
 
-/* ---------- datos ---------- */
-let started=false;
-const LINEAS=['J1','J2','E1','J'];
-function initListeners(){
-  if(started)return;started=true;
-  $('dot').className='dot';
+/* ---------- fotos ---------- */
+const adj={foto:null,subiendo:false};
+function comprimir(file){return new Promise(res=>{const img=new Image(),fr=new FileReader();
+  fr.onload=()=>{img.onload=()=>{const mx=1400;let w=img.width,h=img.height;if(w>h&&w>mx){h=Math.round(h*mx/w);w=mx;}else if(h>mx){w=Math.round(w*mx/h);h=mx;}
+    const c=document.createElement("canvas");c.width=w;c.height=h;c.getContext("2d").drawImage(img,0,0,w,h);c.toBlob(b=>res(b),"image/jpeg",0.72);};img.src=fr.result;};fr.readAsDataURL(file);});}
+$("c_foto").onchange=async ev=>{const f=ev.target.files[0];if(!f)return;ev.target.value="";$("c_thumbs").innerHTML='<div class="hint">comprimiendo…</div>';
+  try{const blob=await comprimir(f);const path=`comprobantes-taller/${Date.now()}-${Math.random().toString(36).slice(2,8)}.jpg`;
+    const url=await new Promise((res,rej)=>{const t=uploadBytesResumable(sRef(storage,path),blob,{contentType:"image/jpeg"});t.on("state_changed",null,rej,async()=>res(await getDownloadURL(t.snapshot.ref)));});
+    adj.foto={url,path,name:f.name};$("c_thumbs").innerHTML=`<img src="${esc(url)}">`;}
+  catch(e){$("c_thumbs").innerHTML='<div class="hint" style="color:#991b1b">No subió: '+esc(e.message)+"</div>";}};
+
+/* ---------- guardar: compra de material ---------- */
+$("c_gramos").oninput=$("c_total").oninput=()=>{const g=num($("c_gramos").value),t=num($("c_total").value);
+  $("c_res").innerHTML=g>0&&t>0?`Precio del gramo: <b>${money(t/g)}</b> · quedan <b>${gramos(g)}</b> en el cajón.`:"Escribe gramos y total: el precio del gramo se calcula.";};
+$("c_guardar").onclick=async()=>{
+  const fechaV=$("c_fecha").value,mat=$("c_material").value,g=num($("c_gramos").value),t=num($("c_total").value);
+  if(!fechaV||!mat||g<=0||t<=0){toast("Faltan fecha, material, gramos o total");return;}
+  const pg=t/g,notas=$("c_notas").value,prov=$("c_proveedor").value,met=$("c_metodo").value||"Efectivo";
+  $("c_guardar").disabled=true;toast("Guardando…");
   try{
-    onSnapshot(collection(db,'records'),snap=>{
-      const rows=[];
-      snap.forEach(d=>{const r=d.data();if(!(r.linea&&LINEAS.includes(r.linea)))return;if(r.type!=='expense')return;rows.push(r);});
-      rows.sort((a,b)=>(b.date||'').localeCompare(a.date||''));
-      $('movs').innerHTML=rows.length?rows.slice(0,60).map(r=>
-        `<div class="row"><div><div>${esc(r.description||r.category||'—')}</div><div class="muted">${fecha(r.date)} · ${esc(r.category||'')}${r.destino&&r.destino.codigo?' · '+esc(r.destino.codigo):''}</div></div><div class="r">${money(r.amount)}</div></div>`
-      ).join(''):'<div class="empty">Todavía no hay gastos del taller con línea. Aparecerán acá cuando la captura empiece a escribirlos.</div>';
-    },err=>{dot('err',err.message);});
-  }catch(e){dot('err',e.message);}
+    const nombreMat=(D.materiales.find(x=>x.codigo===mat)||{}).nombre||mat;
+    const rec={type:"expense",date:fechaV,quantity:g,unitAmount:pg,amount:t,unidad:"g",category:"J1 · Metal",linea:"J1",
+      destino:{tipo:"material",codigo:mat},supplier:prov,person:"",method:met,status:"Pagado",ambito:"Suma",
+      description:`Compra de ${nombreMat}${notas?" — "+notas:""}`,tags:"taller, material",attachments:adj.foto?[adj.foto]:[],updatedAt:new Date().toISOString()};
+    const ref=await addDoc(collection(db,"records"),rec);
+    await addDoc(collection(db,"taller_material"),{tipo:"entrada",material:mat,gramos:g,fecha:fechaV,precioRef:pg,
+      proveedor:prov,recordId:ref.id,notas,updatedAt:new Date().toISOString()});
+    await addDoc(collection(db,"taller_precios"),{fecha:fechaV,material:mat,precioPorGramo:pg,origen:"compra",recordId:ref.id});
+    adj.foto=null;$("c_thumbs").innerHTML="";$("c_gramos").value="";$("c_total").value="";$("c_notas").value="";$("c_res").innerHTML="–";
+    toast("✓ Compra guardada: egreso y entrada");
+  }catch(e){toast("⚠ "+e.message);}
+  $("c_guardar").disabled=false;
+};
 
+/* ---------- guardar: salida a pieza ---------- */
+function pintarResSalida(){const mat=$("s_material").value,g=num($("s_gramos").value),cod=$("s_pieza").value;
+  const cp=costoPromedio(mat);
+  $("s_res").innerHTML=g>0?`Se valora a <b>${money(cp)}</b> el gramo (costo promedio del cajón): <b>${money(g*cp)}</b>${cod?` para ${esc(cod)}`:""}. Quedan ${gramos(saldo(mat))} en el cajón.`:"Escribe los gramos.";}
+$("s_material").onchange=$("s_gramos").oninput=$("s_pieza").onchange=pintarResSalida;
+$("s_guardar").onclick=async()=>{
+  const fechaV=$("s_fecha").value,mat=$("s_material").value,g=num($("s_gramos").value),cod=$("s_pieza").value;
+  if(!fechaV||!mat||g<=0||!cod){toast("Faltan fecha, pieza, material o gramos");return;}
+  if(g>saldo(mat)&&!confirm(`Solo hay ${gramos(saldo(mat))} de ese material en el cajón. ¿Guardar de todos modos?`))return;
+  const cp=costoPromedio(mat);$("s_guardar").disabled=true;
+  try{await addDoc(collection(db,"taller_material"),{tipo:"salida",material:mat,gramos:g,fecha:fechaV,precioRef:cp,
+      destino:{tipo:"pieza",codigo:cod},notas:$("s_notas").value,updatedAt:new Date().toISOString()});
+    $("s_gramos").value="";$("s_notas").value="";$("s_res").innerHTML="–";toast("✓ Salida guardada");
+  }catch(e){toast("⚠ "+e.message);}
+  $("s_guardar").disabled=false;
+};
+
+/* ---------- guardar: horas ---------- */
+$("h_destino_tipo").onchange=()=>{const c=$("h_destino_tipo").value==="clase";$("h_clase_wrap").hidden=!c;$("h_pieza_wrap").hidden=c;};
+$("h_guardar").onclick=async()=>{
+  const fechaV=$("h_fecha").value,per=$("h_persona").value,hh=num($("h_horas").value),lin=$("h_linea").value;
+  const esClase=$("h_destino_tipo").value==="clase";
+  if(!fechaV||!per||hh<=0){toast("Faltan fecha, persona u horas");return;}
+  const cod=esClase?$("h_clase").value:$("h_pieza").value;
+  if(!cod){toast("Falta el destino");return;}
+  $("h_guardar").disabled=true;
+  try{await addDoc(collection(db,"taller_horas"),{fecha:fechaV,persona:per,horas:hh,linea:lin,
+      destino:{tipo:esClase?"clase":"pieza",codigo:cod},tipo:esClase?"enseñanza":"produccion",notas:$("h_notas").value,updatedAt:new Date().toISOString()});
+    $("h_horas").value="";$("h_notas").value="";toast("✓ Horas guardadas");
+  }catch(e){toast("⚠ "+e.message);}
+  $("h_guardar").disabled=false;
+};
+
+/* ---------- guardar: pieza ---------- */
+function proximoCodigo(lin){const pre=lin+"-"+String(new Date().getFullYear()).slice(2)+"-";
+  const usados=D.piezas.map(p=>p.codigo||"").filter(c=>c.startsWith(pre)).map(c=>Number(c.slice(pre.length))||0);
+  return pre+String((usados.length?Math.max(...usados):0)+1).padStart(3,"0");}
+$("p_linea").onchange=()=>{if(!$("p_existente").value)$("p_codigo").value=proximoCodigo($("p_linea").value);};
+$("p_existente").onchange=()=>{const c=$("p_existente").value;if(!c){$("p_codigo").value=proximoCodigo($("p_linea").value);$("p_res").innerHTML="–";return;}
+  const p=D.piezas.find(x=>x.codigo===c);if(!p)return;
+  $("p_codigo").value=p.codigo||"";$("p_linea").value=p.linea||"J1";$("p_nombre").value=p.nombre||"";
+  $("p_material").value=p.materialPrincipal||$("p_material").value;$("p_estado").value=p.estado||"en proceso";
+  $("p_precio").value=(p.precioVitrina&&p.precioVitrina.length)?p.precioVitrina[p.precioVitrina.length-1].precio:"";
+  $("p_cliente").value=p.cliente||"";$("p_encargo").value=p.encargo||"";$("p_notas").value=p.notas||"";
+  $("p_res").innerHTML=`${gramos(gramosDe(c))} · costo <b>${money(costoDe(c))}</b>${p.cierre?" · cerrado: "+money(p.cierre.costo):""}`;};
+$("p_guardar").onclick=async()=>{
+  const cod=($("p_codigo").value||"").trim(),lin=$("p_linea").value,nom=$("p_nombre").value.trim(),mat=$("p_material").value,est=$("p_estado").value;
+  if(!cod||!nom){toast("Faltan código y nombre");return;}
+  const precio=num($("p_precio").value);
+  const existente=D.piezas.find(p=>p.codigo===cod);
+  if(!existente&&D.piezas.some(p=>p.codigo===cod)){toast("Ese código ya existe");return;}
+  const base={nombre:nom,linea:lin,materialPrincipal:mat,estado:est,cliente:$("p_cliente").value||"",encargo:$("p_encargo").value||"",
+    notas:$("p_notas").value||"",updatedAt:new Date().toISOString()};
+  $("p_guardar").disabled=true;
   try{
-    onSnapshot(collection(db,'taller_material'),snap=>{
-      const m={};
-      snap.forEach(d=>{const x=d.data();const k=x.material||'—';m[k]=m[k]||{entrada:0,salida:0,merma:0,recuperacion:0,ajuste:0};
-        const g=Number(x.gramos||0);
-        if(x.tipo==='entrada')m[k].entrada+=g;else if(x.tipo==='salida')m[k].salida+=g;
-        else if(x.tipo==='merma')m[k].merma+=g;else if(x.tipo==='recuperacion')m[k].recuperacion+=g;
-        else if(x.tipo==='ajuste')m[k].ajuste+=g;});
-      const keys=Object.keys(m).sort();
-      $('kardex').innerHTML=keys.length?keys.map(k=>{const v=m[k];const saldo=v.entrada+v.recuperacion-v.salida-v.merma+v.ajuste;
-        return `<div class="row"><div><div>${esc(k)}</div><div class="muted">entradas ${gramos(v.entrada)} · a piezas ${gramos(v.salida)} · merma ${gramos(v.merma)} · recuperado ${gramos(v.recuperacion)}</div></div><div class="r">${gramos(saldo)}</div></div>`;
-      }).join(''):'<div class="empty">Sin movimientos de material todavía.</div>';
-    },err=>{dot('err',err.message);});
-  }catch(e){dot('err',e.message);}
+    let hist=existente&&Array.isArray(existente.precioVitrina)?existente.precioVitrina.slice():[];
+    if(precio>0&&(!hist.length||Number(hist[hist.length-1].precio)!==precio))hist.push({fecha:hoy(),precio});
+    base.precioVitrina=hist;
+    if(est==="en vitrina"&&!base.fechaEntrega)base.fechaEntrega=hoy();
+    if(est==="terminada"&&!(existente&&existente.cierre))base.cierre={fecha:hoy(),costo:costoDe(cod),gramos:gramosDe(cod),horas:horasDe(cod),promedioUsado:costoPromedio(mat)};
+    if(existente)await updateDoc(doc(db,"taller_piezas",cod),base);
+    else await setDoc(doc(db,"taller_piezas",cod),{...base,creado:new Date().toISOString(),precioVitrina:hist});
+    $("p_res").innerHTML="Guardada.";toast(existente?"✓ Pieza actualizada":"✓ Pieza creada");
+  }catch(e){toast("⚠ "+e.message);}
+  $("p_guardar").disabled=false;
+};
 
+/* ---------- guardar: merma ---------- */
+$("m_guardar").onclick=async()=>{
+  const fechaV=$("m_fecha").value,mat=$("m_material").value,g=num($("m_gramos").value),causa=$("m_causa").value,cod=$("m_pieza").value;
+  if(!fechaV||!mat||g<=0||!causa){toast("Faltan fecha, material, gramos o causa");return;}
+  $("m_guardar").disabled=true;
+  try{await addDoc(collection(db,"taller_material"),{tipo:"merma",material:mat,gramos:g,fecha:fechaV,causa,
+      destino:cod?{tipo:"pieza",codigo:cod}:null,precioRef:costoPromedio(mat),notas:$("m_notas").value,updatedAt:new Date().toISOString()});
+    $("m_gramos").value="";$("m_notas").value="";toast("✓ Merma guardada");
+  }catch(e){toast("⚠ "+e.message);}
+  $("m_guardar").disabled=false;
+};
+
+/* ---------- guardar: conteo ---------- */
+function pintarResConteo(){const mat=$("k_material").value,g=num($("k_gramos").value);const teo=saldo(mat);const dif=g-teo;
+  $("k_res").innerHTML=g>0||$("k_gramos").value!==""?`El kardex dice <b>${gramos(teo)}</b> · contados <b>${gramos(g)}</b> · diferencia <b>${gramos(dif)}</b>${dif<0?" (falta)":" (sobra)"}`:"–";}
+$("k_material").onchange=$("k_gramos").oninput=pintarResConteo;
+$("k_guardar").onclick=async()=>{
+  const fechaV=$("k_fecha").value,mat=$("k_material").value,txt=$("k_gramos").value,g=num(txt);
+  if(!fechaV||!mat||txt===""){toast("Faltan fecha, material o gramos");return;}
+  const teo=saldo(mat),dif=g-teo;
+  $("k_guardar").disabled=true;
   try{
-    onSnapshot(collection(db,'taller_piezas'),snap=>{
-      const rows=[];snap.forEach(d=>rows.push(d.data()));
-      rows.sort((a,b)=>(b.codigo||'').localeCompare(a.codigo||''));
-      $('piezas').innerHTML=rows.length?rows.map(p=>
-        `<div class="row"><div><div>${esc(p.nombre||p.codigo||'—')}</div><div class="muted">${esc(p.codigo||'')} · ${esc(p.linea||'')} · ${esc(p.materialPrincipal||'')}</div></div><div class="r"><span class="pill ${p.estado==='vendida'?'g':(p.estado==='terminada'?'y':'')}">${esc(p.estado||'—')}</span></div></div>`
-      ).join(''):'<div class="empty">Sin piezas registradas todavía.</div>';
-    },err=>{dot('err',err.message);});
-  }catch(e){dot('err',e.message);}
+    const ref=await addDoc(collection(db,"taller_conteos"),{fecha:fechaV,material:mat,gramosContados:g,gramosTeoricos:teo,
+      estimado:true,notas:$("k_notas").value||"",updatedAt:new Date().toISOString()});
+    if(Math.abs(dif)>0.0001)await addDoc(collection(db,"taller_material"),{tipo:"ajuste",material:mat,gramos:dif,fecha:fechaV,
+      conteo:ref.id,precioRef:costoPromedio(mat),notas:"ajuste por conteo",updatedAt:new Date().toISOString()});
+    $("k_gramos").value="";$("k_notas").value="";$("k_res").innerHTML="–";toast("✓ Conteo guardado"+(Math.abs(dif)>0.0001?" con su ajuste":""));
+  }catch(e){toast("⚠ "+e.message);}
+  $("k_guardar").disabled=false;
+};
 
-  dot('ok','conectado');
-}
-function dot(state,msg){$('dot').className='dot '+state;$('who').textContent=msg||'';}
+/* ---------- añadir a los catálogos ---------- */
+document.querySelectorAll("[data-add]").forEach(b=>b.onclick=async()=>{
+  const col=b.dataset.add;
+  const nombre=prompt(col==="clases"?"Código y nombre de la clase, así: J2-26-003 Platería básica":"Nombre para añadir a la lista");
+  if(!nombre)return;
+  try{
+    if(col==="clases"){const [cod,...resto]=nombre.trim().split(" ");await setDoc(doc(db,"taller_clases",cod),{codigo:cod,nombre:resto.join(" ")||cod});}
+    else if(col==="materiales"){const cod=nombre.trim().toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+      await setDoc(doc(db,"taller_materiales",cod),{codigo:cod,nombre:nombre.trim(),metalBase:"otro",pureza:1});}
+    else{const cod=nombre.trim().toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+      await setDoc(doc(db,"taller_"+col,cod),{nombre:nombre.trim()});}
+    toast("✓ Añadido");
+  }catch(e){toast("⚠ "+e.message);}
+});
+
+/* ---------- fechas por defecto ---------- */
+["c_fecha","s_fecha","h_fecha","m_fecha","k_fecha"].forEach(id=>$(id).value=hoy());
+$("p_codigo").value=proximoCodigo("J1");
 document.documentElement.dataset.taller='listo';
 </script>
 </body>
