@@ -168,7 +168,8 @@ button.ghost{background:none;border:1px dashed var(--line);border-radius:10px;co
       </div>
 
       <div class="card form" id="f-merma" hidden>
-        <h2>Merma</h2>
+        <h2>Merma declarada</h2>
+        <div class="hint">La merma del día a día no se declara: se provisiona al 10 % en el costo de la pieza y se mide al contar el cajón. Esto es para la pérdida grande y sabida: una fundición que se derrama, una pieza que se rompe.</div>
         <div class="field"><label>Fecha</label><input type="date" id="m_fecha"></div>
         <div class="field"><label>Material</label><select id="m_material"></select></div>
         <div class="row2">
@@ -248,9 +249,11 @@ button.ghost{background:none;border:1px dashed var(--line);border-radius:10px;co
         <div class="glos"><b>J2 · Material de clases</b><div>El material que se entrega en clase y no se le recarga al alumno.</div></div>
       </div>
       <div class="card">
-        <h2>Cuatro palabras</h2>
+        <h2>Las palabras</h2>
         <div class="glos"><b>Destino</b><div>A qué se carga: a una pieza, al material del cajón o a una clase. Es lo que convierte un gasto en costo.</div></div>
-        <div class="glos"><b>Merma</b><div>El material que se pierde en el trabajo, con causa. Se mide para poder reducirla; hoy no se mide.</div></div>
+        <div class="glos"><b>Merma provisionada</b><div>El 10 % que se le carga al metal de cada pieza. Cubre que una pieza haya que fundirla dos veces, que el material venga agrio o que se vaya mucha lima. Es previsión del proceso, no una retención.</div></div>
+        <div class="glos"><b>Merma medida</b><div>La que aparece al contar el cajón y al fundir las limallas. Se compara con el 10 %: lo que midas por debajo de eso es margen tuyo.</div></div>
+        <div class="glos"><b>Merma declarada</b><div>La pérdida grande y sabida, que sí se anota con su causa. No es la del día a día.</div></div>
         <div class="glos"><b>Recuperación</b><div>El barrido que se funde y vuelve a ser material. No es merma ni es compra.</div></div>
         <div class="glos"><b>Aleación</b><div>Plata fina más liga para hacer 925: salen unos materiales y entra otro. No es una pérdida.</div></div>
       </div>
@@ -261,6 +264,10 @@ button.ghost{background:none;border:1px dashed var(--line);border-radius:10px;co
       <div class="card">
         <h2>El ciclo de la pieza</h2>
         <div class="muted"><b>En proceso</b> → <b>Terminada</b> → <b>En vitrina</b> → <b>Vendida</b>. También puede <b>retirarse</b> de la vitrina sin venderse, o <b>descartarse</b> devolviendo sus gramos al kardex. El código de la pieza es lo que la une con su venta.</div>
+      </div>
+      <div class="card">
+        <h2>Política del taller</h2>
+        <div class="muted">Con el oro que trae el cliente, <b>todo lo que sobra se le devuelve</b>: el taller no retiene merma. El 10 % protege el proceso —fundidas repetidas, material agrio, lima— y no se queda con nada del cliente.</div>
       </div>
       <div class="card">
         <h2>La regla de oro</h2>
@@ -332,9 +339,13 @@ function saldo(cod){let s=0;D.material.forEach(m=>{if(m.material!==cod)return;co
   if(esEntrada(m))s+=g;else if(m.tipo==="salida"||m.tipo==="merma")s-=g;else if(m.tipo==="ajuste")s+=g;});return s;}
 function costoPromedio(cod,hasta){let g=0,v=0;D.material.forEach(m=>{if(m.material!==cod)return;if(hasta&&(m.fecha||"")>hasta)return;if(!sumaAlPromedio(m))return;const gg=Number(m.gramos)||0;const p=Number(m.precioRef)||0;g+=gg;v+=gg*p;});return g>0?v/g:0;}
 function precioRef(cod){const ps=D.precios.filter(p=>p.material===cod&&(p.origen==="compra"||p.origen==="consulta")).sort((a,b)=>(b.fecha||"").localeCompare(a.fecha||""));if(ps.length)return {p:Number(ps[0].precioPorGramo)||0,f:ps[0].fecha,o:ps[0].origen};const c=costoPromedio(cod);return {p:c,f:null,o:"costo promedio"};}
+const MERMA_ESTANDAR=0.10;
+const mermaDe=m=>(m&&m.mermaEstandar!==undefined)?Number(m.mermaEstandar):MERMA_ESTANDAR;
+const pctMerma=m=>Math.round(mermaDe(m)*100);
+function mermaDeMaterial(cod){return mermaDe(D.materiales.find(x=>x.codigo===cod));}
 function costoDirectoDe(cod){return D.records.filter(r=>r.type==="expense"&&r.destino&&r.destino.tipo==="pieza"&&r.destino.codigo===cod).reduce((a,r)=>a+(Number(r.amount)||0),0);}
 function gramosDe(cod){return D.material.filter(m=>m.tipo==="salida"&&m.destino&&m.destino.tipo==="pieza"&&m.destino.codigo===cod).reduce((a,m)=>a+(Number(m.gramos)||0),0);}
-function valorMetalDe(cod){return D.material.filter(m=>m.tipo==="salida"&&m.destino&&m.destino.tipo==="pieza"&&m.destino.codigo===cod).reduce((a,m)=>a+(Number(m.gramos)||0)*(Number(m.precioRef)||0),0);}
+function valorMetalDe(cod){return D.material.filter(m=>m.tipo==="salida"&&m.destino&&m.destino.tipo==="pieza"&&m.destino.codigo===cod).reduce((a,m)=>a+(Number(m.gramos)||0)*(Number(m.precioRef)||0)*(1+mermaDeMaterial(m.material)),0);}
 function horasDe(cod){return D.horas.filter(h=>h.destino&&h.destino.codigo===cod).reduce((a,h)=>a+(Number(h.horas)||0),0);}
 function costoDe(cod){return costoDirectoDe(cod)+valorMetalDe(cod);}
 function vendida(p){return !!(p.venta&&p.venta.recordId);}
@@ -529,8 +540,8 @@ $("c_guardar").onclick=async()=>{
 
 /* ---------- guardar: salida a pieza ---------- */
 function pintarResSalida(){const mat=$("s_material").value,g=num($("s_gramos").value),cod=$("s_pieza").value;
-  const cp=costoPromedio(mat,$("s_fecha").value);
-  $("s_res").innerHTML=g>0?`Se valora a <b>${money(cp)}</b> el gramo (costo promedio del cajón): <b>${money(g*cp)}</b>${cod?` para ${esc(cod)}`:""}. Quedan ${gramos(saldo(mat))} en el cajón.`:"Escribe los gramos.";}
+  const cp=costoPromedio(mat,$("s_fecha").value),mer=mermaDeMaterial(mat);
+  $("s_res").innerHTML=g>0?`Se valora a <b>${money(cp)}</b> el gramo (costo promedio del cajón): <b>${money(g*cp)}</b> de metal, <b>${money(g*cp*(1+mer))}</b> al costo de la pieza con la merma del ${Math.round(mer*100)} %${cod?` para ${esc(cod)}`:""}. Quedan ${gramos(saldo(mat))} en el cajón.`:"Escribe los gramos.";}
 $("s_material").onchange=$("s_gramos").oninput=$("s_pieza").onchange=pintarResSalida;
 $("s_guardar").onclick=async()=>{
   const fechaV=$("s_fecha").value,mat=$("s_material").value,g=num($("s_gramos").value),cod=$("s_pieza").value;
@@ -588,7 +599,7 @@ $("p_guardar").onclick=async()=>{
     base.precioVitrina=hist;
     if(est==="en vitrina"&&!(existente&&existente.fechaEntrega))base.fechaEntrega=hoy();
     if((est==="terminada"||est==="en vitrina")&&!(existente&&existente.cierre))
-      base.cierre={fecha:hoy(),costo:costoDe(cod),gramos:gramosDe(cod),horas:horasDe(cod),promedioUsado:costoPromedio(mat)};
+      base.cierre={fecha:hoy(),costo:costoDe(cod),gramos:gramosDe(cod),horas:horasDe(cod),promedioUsado:costoPromedio(mat),mermaUsada:mermaDeMaterial(mat)};
     if(existente)await updateDoc(doc(db,"taller_piezas",cod),base);
     else await setDoc(doc(db,"taller_piezas",cod),{...base,creado:new Date().toISOString(),precioVitrina:hist});
     if(est==="descartada"&&!(existente&&existente.estado==="descartada")){
