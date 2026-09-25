@@ -54,7 +54,19 @@ button.ghost{background:none;border:1px dashed var(--line);border-radius:10px;co
 #login .card{width:100%;max-width:360px}
 .thumbs{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
 .thumbs img{width:56px;height:56px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
-#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--tab-h) + 14px);background:var(--ink);color:#fef9f0;padding:10px 14px;border-radius:99px;font-size:13px;opacity:0;transition:opacity .25s;z-index:400;pointer-events:none;max-width:90vw;text-align:center}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--tab-h) + 14px);background:var(--ink);color:#fef9f0;padding:10px 14px;border-radius:99px;font-size:13px;opacity:0;transition:opacity .25s;z-index:600;pointer-events:none;max-width:90vw;text-align:center}
+.item.ed{cursor:pointer;border-radius:8px}
+.item.ed:hover,.item.ed:active{background:#f8f3ec}
+.item.ed .r::after{content:" ›";color:var(--muted);font-weight:400}
+.card>.hint{font-size:11px;color:var(--muted);margin:-6px 0 6px}
+#sheet{position:fixed;inset:0;background:rgba(28,25,23,.45);z-index:450;display:flex;align-items:flex-end;justify-content:center}
+#sheet[hidden]{display:none}
+.sheet-card{background:var(--card);width:100%;max-width:520px;max-height:90vh;overflow:auto;border-radius:18px 18px 0 0;padding:16px 16px 24px}
+.sheet-card h2{font-family:'Fraunces',serif;font-size:17px;margin:0 0 10px}
+.sheet-bts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.sheet-bts button{padding:12px;border-radius:12px;font:inherit;font-weight:700;cursor:pointer}
+button.danger{background:var(--red-bg);color:var(--red);border:1px solid #fecaca}
+button.plain{background:none;border:1px solid var(--line);color:var(--ink)}
 #toast.show{opacity:1}
 </style>
 </head>
@@ -219,13 +231,15 @@ button.ghost{background:none;border:1px dashed var(--line);border-radius:10px;co
 
     <!-- ============ MOVIMIENTOS ============ -->
     <section id="v-movimientos" hidden>
-      <div class="card"><h2>Egresos del taller</h2><div id="movs"><div class="empty">Todavía no hay registros.</div></div></div>
+      <div class="card"><h2>Egresos del taller</h2><div class="hint">Toca un registro para corregirlo o borrarlo.</div><div id="movs"><div class="empty">Todavía no hay registros.</div></div></div>
+      <div class="card"><h2>Horas</h2><div id="lhoras"><div class="empty">Todavía no hay horas.</div></div></div>
     </section>
 
     <!-- ============ KARDEX ============ -->
     <section id="v-kardex" hidden>
       <div class="card"><h2>El cajón</h2><div id="kardex"><div class="empty">Sin movimientos de material todavía.</div></div></div>
-      <div class="card"><h2>Movimientos de material</h2><div id="kmovs"><div class="empty">Sin movimientos.</div></div></div>
+      <div class="card"><h2>Movimientos de material</h2><div class="hint">Toca un movimiento para corregirlo o borrarlo. El ajuste se corrige desde su conteo.</div><div id="kmovs"><div class="empty">Sin movimientos.</div></div></div>
+      <div class="card"><h2>Conteos</h2><div id="lconteos"><div class="empty">Sin conteos.</div></div></div>
     </section>
 
     <!-- ============ PIEZAS ============ -->
@@ -286,11 +300,24 @@ button.ghost{background:none;border:1px dashed var(--line);border-radius:10px;co
   </div>
 </div>
 
+<div id="sheet" hidden>
+  <div class="sheet-card">
+    <h2 id="sheet_t">Corregir</h2>
+    <div class="res" id="sheet_n" hidden></div>
+    <div id="sheet_f"></div>
+    <button class="primary" id="sheet_guardar">Guardar cambios</button>
+    <div class="sheet-bts">
+      <button class="danger" id="sheet_borrar">Borrar</button>
+      <button class="plain" id="sheet_cerrar">Cerrar</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script type="module">
 import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import{getFirestore,collection,doc,addDoc,setDoc,updateDoc,onSnapshot,writeBatch}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import{getFirestore,collection,doc,addDoc,setDoc,updateDoc,deleteDoc,onSnapshot,writeBatch}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 import{getAuth,signInWithEmailAndPassword,signOut,onAuthStateChanged,setPersistence,browserLocalPersistence}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 import{getStorage,ref as sRef,uploadBytesResumable,getDownloadURL}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js';
 
@@ -414,7 +441,7 @@ function pintar(){
 
   /* caja */
   const rr=D.records.filter(r=>r.linea&&LINEAS.includes(r.linea)&&r.type==="expense").sort((a,b)=>(b.date||"").localeCompare(a.date||""));
-  $("movs").innerHTML=rr.length?rr.slice(0,80).map(r=>`<div class="item"><div class="row"><div><div class="t">${esc(r.description||r.category||"—")}</div><div class="m">${fecha(r.date)} · ${esc(r.category||"")}${r.destino&&r.destino.codigo?" · "+esc(r.destino.codigo):""}</div></div><div class="r">${money(r.amount)}</div></div></div>`).join(""):'<div class="empty">Todavía no hay egresos del taller.</div>';
+  $("movs").innerHTML=rr.length?rr.slice(0,80).map(r=>`<div class="item ed" data-ed="registro:${esc(r.id)}"><div class="row"><div><div class="t">${esc(r.description||r.category||"—")}</div><div class="m">${fecha(r.date)} · ${esc(r.category||"")}${r.destino&&r.destino.codigo?" · "+esc(r.destino.codigo):""}</div></div><div class="r">${money(r.amount)}</div></div></div>`).join(""):'<div class="empty">Todavía no hay egresos del taller.</div>';
 
   /* kardex */
   const mats=D.materiales.map(m=>m.codigo);
@@ -427,13 +454,20 @@ function pintar(){
   $("kmovs").innerHTML=kk.length?kk.slice(0,60).map(m=>{const mat=D.materiales.find(x=>x.codigo===m.material)||{nombre:m.material};
     const et={entrada:"entrada",salida:"a pieza",merma:"merma",recuperacion:"recuperación",ajuste:"ajuste"}[m.tipo]||m.tipo;
     const signo=(m.tipo==="salida"||m.tipo==="merma")?"−":"+";
-    return `<div class="item"><div class="row"><div><div class="t">${esc(mat.nombre||m.material)} <span class="tag">${et}</span></div><div class="m">${fecha(m.fecha)}${m.destino&&m.destino.codigo?" · "+esc(m.destino.codigo):""}${m.causa?" · "+esc(m.causa):""}${m.precioRef?" · "+money(m.precioRef)+"/g":""}</div></div><div class="r">${signo}${gramos(Math.abs(Number(m.gramos)||0))}</div></div></div>`}).join(""):'<div class="empty">Sin movimientos.</div>';
+    return `<div class="item ed" data-ed="mov:${esc(m.id)}"><div class="row"><div><div class="t">${esc(mat.nombre||m.material)} <span class="tag">${et}</span></div><div class="m">${fecha(m.fecha)}${m.destino&&m.destino.codigo?" · "+esc(m.destino.codigo):""}${m.causa?" · "+esc(m.causa):""}${m.precioRef?" · "+money(m.precioRef)+"/g":""}</div></div><div class="r">${signo}${gramos(Math.abs(Number(m.gramos)||0))}</div></div></div>`}).join(""):'<div class="empty">Sin movimientos.</div>';
+
+  const cc=D.conteos.slice().sort((a,b)=>(b.fecha||"").localeCompare(a.fecha||""));
+  $("lconteos").innerHTML=cc.length?cc.map(c=>{const mat=D.materiales.find(x=>x.codigo===c.material)||{nombre:c.material};const dif=(Number(c.gramosContados)||0)-(Number(c.gramosTeoricos)||0);
+    return `<div class="item ed" data-ed="conteo:${esc(c.id)}"><div class="row"><div><div class="t">${esc(mat.nombre||c.material)}</div><div class="m">${fecha(c.fecha)} · el kardex decía ${gramos(c.gramosTeoricos)} · diferencia ${gramos(dif)}</div></div><div class="r">${gramos(c.gramosContados)}</div></div></div>`}).join(""):'<div class="empty">Sin conteos.</div>';
+
+  const hh=D.horas.slice().sort((a,b)=>(b.fecha||"").localeCompare(a.fecha||""));
+  $("lhoras").innerHTML=hh.length?hh.slice(0,80).map(h=>`<div class="item ed" data-ed="horas:${esc(h.id)}"><div class="row"><div><div class="t">${esc(h.persona||"—")}</div><div class="m">${fecha(h.fecha)} · ${esc(h.linea||"")}${h.destino&&h.destino.codigo?" · "+esc(h.destino.codigo):""}${h.notas?" · "+esc(h.notas):""}</div></div><div class="r">${(Number(h.horas)||0).toLocaleString("es-CO")} h</div></div></div>`).join(""):'<div class="empty">Todavía no hay horas.</div>';
 
   /* piezas */
   $("piezas").innerHTML=D.piezas.length?D.piezas.map(p=>{const v=vendida(p);const ing=ingresoDe(p);const costo=(p.cierre&&p.cierre.costo)?p.cierre.costo:costoDe(p.codigo);
     const est=v?"vendida":(p.estado||"en proceso");
     const ingreso=ing?(Number(ing.amount)||0):null;
-    return `<div class="item"><div class="row"><div><div class="t">${esc(p.codigo||"")} · ${esc(p.nombre||"")}</div>
+    return `<div class="item ed" data-ed="pieza:${esc(p.codigo)}"><div class="row"><div><div class="t">${esc(p.codigo||"")} · ${esc(p.nombre||"")}</div>
       <div class="m"><span class="tag ${v?"ok":(p.estado==="descartada"?"err":"")}">${esc(est)}</span> ${esc(p.linea||"")}${p.cliente?" · "+esc(p.cliente):""}</div>
       <div class="m">${gramos(gramosDe(p.codigo))} · costo ${money(costo)}${p.cierre?" (cerrado)":""}${horasDe(p.codigo)?" · "+horasDe(p.codigo)+" h":""}</div>
       ${ingreso!=null?`<div class="m">venta ${money(ingreso)} · margen ${money(ingreso-costo)}</div>`:""}
@@ -674,6 +708,203 @@ document.querySelectorAll("[data-add]").forEach(b=>b.onclick=async()=>{
       await setDoc(doc(db,"taller_"+col,cod),{nombre:nombre.trim()});}
     toast("✓ Añadido");
   }catch(e){toast("⚠ "+e.message);}
+});
+
+/* ---------- corregir y borrar registros ---------- */
+const numTxt=n=>(n===undefined||n===null||n==="")?"":String(n).replace(".",",");
+const ahora=()=>new Date().toISOString();
+const ev=k=>$("e_"+k)?$("e_"+k).value:"";
+let hoja=null;
+function campo(f){
+  const id="e_"+f.k;let inp;
+  if(f.t==="select"){let o=f.o||[];if(f.v&&!o.some(x=>String(x[0])===String(f.v)))o=[[f.v,f.v]].concat(o);
+    inp=`<select id="${id}">${o.map(([v,l])=>`<option value="${esc(v)}"${String(v)===String(f.v==null?"":f.v)?" selected":""}>${esc(l)}</option>`).join("")}</select>`;}
+  else inp=`<input id="${id}" type="${f.t==="date"?"date":"text"}"${f.t==="num"?' inputmode="decimal"':""} value="${esc(f.t==="num"?numTxt(f.v):(f.v==null?"":f.v))}">`;
+  return `<div class="field" id="w_${f.k}"><label>${esc(f.l)}</label>${inp}${f.h?`<div class="hint">${esc(f.h)}</div>`:""}</div>`;
+}
+function abrirHoja(titulo,campos,op){
+  $("sheet_t").textContent=titulo;
+  $("sheet_f").innerHTML=campos.map(campo).join("");
+  $("sheet_n").innerHTML=op.nota||"";$("sheet_n").hidden=!op.nota;
+  $("sheet_guardar").hidden=!op.guardar;$("sheet_borrar").hidden=!op.borrar;
+  hoja=op;$("sheet").hidden=false;
+  if(op.despues)op.despues();
+}
+function cerrarHoja(){$("sheet").hidden=true;hoja=null;}
+$("sheet_cerrar").onclick=cerrarHoja;
+$("sheet").onclick=e=>{if(e.target===$("sheet"))cerrarHoja();};
+$("sheet_guardar").onclick=async()=>{if(!hoja||!hoja.guardar)return;$("sheet_guardar").disabled=true;
+  try{const msg=await hoja.guardar();if(msg){cerrarHoja();toast(msg);}}catch(e){toast("⚠ "+e.message);}
+  $("sheet_guardar").disabled=false;};
+$("sheet_borrar").onclick=async()=>{if(!hoja||!hoja.borrar)return;$("sheet_borrar").disabled=true;
+  try{const msg=await hoja.borrar();if(msg){cerrarHoja();toast(msg);}}catch(e){toast("⚠ "+e.message);}
+  $("sheet_borrar").disabled=false;};
+
+const oMateriales=()=>D.materiales.map(o=>[o.codigo,o.nombre]);
+const oNombres=lista=>[["","—"]].concat(lista.map(o=>[o.nombre||o.id,o.nombre||o.id]));
+const oPiezas=actual=>D.piezas.filter(p=>(!vendida(p)&&p.estado!=="descartada")||p.codigo===actual).map(p=>[p.codigo,p.codigo+" · "+(p.nombre||"")]);
+const oClases=()=>D.clases.map(o=>[o.codigo,o.codigo+" · "+(o.nombre||"")]);
+function llenarSel(id,opciones,valor){const s=$(id);if(!s)return;let o=opciones;if(valor&&!o.some(x=>String(x[0])===String(valor)))o=[[valor,valor]].concat(o);
+  s.innerHTML=o.map(([v,l])=>`<option value="${esc(v)}">${esc(l)}</option>`).join("");if(valor)s.value=valor;}
+// Un costo que llega después del cierre avisa y no reescribe el cierre (contrato, sección 4).
+function avisoCierre(...codigos){const c=[...new Set(codigos.filter(Boolean))].filter(x=>{const p=D.piezas.find(y=>y.codigo===x);return p&&p.cierre;});
+  return c.length?` · ${c.join(", ")} ya estaba cerrada: su cierre no cambia`:"";}
+
+function editarRegistro(id){
+  const r=D.records.find(x=>x.id===id);if(!r){toast("Ese registro ya no existe");return;}
+  const mov=D.material.find(m=>m.recordId===id&&m.tipo==="entrada");
+  if(mov)editarCompra(r,mov);else editarGasto(r);
+}
+function editarCompra(r,mov){
+  const pr=D.precios.find(p=>p.recordId===r.id);
+  abrirHoja("Corregir compra de material",[
+    {k:"fecha",l:"Fecha",t:"date",v:r.date},
+    {k:"material",l:"Material",t:"select",o:oMateriales(),v:mov.material},
+    {k:"gramos",l:"Gramos",t:"num",v:mov.gramos,h:"Los decimales van con coma: 0,125."},
+    {k:"total",l:"Total pagado",t:"num",v:r.amount},
+    {k:"proveedor",l:"Proveedor",t:"select",o:oNombres(D.proveedores),v:r.supplier},
+    {k:"metodo",l:"Método",t:"select",o:METODOS.map(x=>[x,x]),v:r.method},
+    {k:"notas",l:"Notas",t:"text",v:mov.notas}
+  ],{nota:"Se corrigen a la vez el egreso, la entrada al cajón y el precio del día. Las salidas ya hechas conservan el precio con que se valoraron.",
+    guardar:async()=>{
+      const f=ev("fecha"),mat=ev("material"),g=num(ev("gramos")),t=num(ev("total")),notas=ev("notas");
+      if(!f||!mat||g<=0||t<=0){toast("Faltan fecha, material, gramos o total");return;}
+      const pg=t/g,nombreMat=(D.materiales.find(x=>x.codigo===mat)||{}).nombre||mat,prov=ev("proveedor");
+      const lote=writeBatch(db);
+      lote.update(doc(db,"records",r.id),{date:f,quantity:g,unitAmount:pg,amount:t,destino:{tipo:"material",codigo:mat},
+        supplier:prov,method:ev("metodo")||"Efectivo",description:`Compra de ${nombreMat}${notas?" — "+notas:""}`,updatedAt:ahora()});
+      lote.update(doc(db,"taller_material",mov.id),{fecha:f,material:mat,gramos:g,precioRef:pg,proveedor:prov,notas,updatedAt:ahora()});
+      if(pr)lote.update(doc(db,"taller_precios",pr.id),{fecha:f,material:mat,precioPorGramo:pg});
+      await lote.commit();return "✓ Compra corregida";},
+    borrar:async()=>{
+      const queda=saldo(mov.material)-(Number(mov.gramos)||0);
+      if(!confirm(`¿Borrar esta compra? Se borran el egreso de ${money(r.amount)}, la entrada de ${gramos(mov.gramos)} al cajón y el precio del día.`+(queda<0?`\n\nOjo: el cajón quedaría en ${gramos(queda)}.`:"")))return;
+      const lote=writeBatch(db);lote.delete(doc(db,"records",r.id));lote.delete(doc(db,"taller_material",mov.id));if(pr)lote.delete(doc(db,"taller_precios",pr.id));
+      await lote.commit();return "✓ Compra borrada";}});
+}
+function editarGasto(r){
+  const cats=CATS.map(c=>[c.c,c.c]);
+  const dest=r.destino||{};
+  abrirHoja("Corregir gasto del taller",[
+    {k:"fecha",l:"Fecha",t:"date",v:r.date},
+    {k:"categoria",l:"Categoría",t:"select",o:cats,v:r.category},
+    {k:"dtipo",l:"Destino",t:"select",o:[["pieza","Una pieza"],["material","El material del cajón"],["clase","Una clase"]],v:dest.tipo||"pieza"},
+    {k:"dcod",l:"¿Cuál?",t:"select",o:[],v:""},
+    {k:"monto",l:"Monto",t:"num",v:r.amount},
+    {k:"proveedor",l:"Proveedor",t:"select",o:oNombres(D.proveedores),v:r.supplier},
+    {k:"metodo",l:"Método",t:"select",o:METODOS.map(x=>[x,x]),v:r.method},
+    {k:"notas",l:"Descripción",t:"text",v:r.description}
+  ],{despues:()=>{
+      let primera=true;
+      const refrescar=()=>{const cat=CATS.find(x=>x.c===ev("categoria"));const d=cat?cat.d:(r.destino?1:0);
+        $("w_dtipo").hidden=(d!==1);$("w_dcod").hidden=(d===0);if(d===0)return;
+        const tipo=d===2?"clase":ev("dtipo");const val=primera?dest.codigo:ev("dcod");primera=false;
+        llenarSel("e_dcod",tipo==="clase"?oClases():(tipo==="material"?oMateriales():oPiezas(dest.codigo)),val);};
+      $("e_categoria").onchange=refrescar;$("e_dtipo").onchange=refrescar;refrescar();},
+    guardar:async()=>{
+      const f=ev("fecha"),monto=num(ev("monto")),cat=CATS.find(x=>x.c===ev("categoria"));
+      if(!f||monto<=0){toast("Faltan fecha o monto");return;}
+      const d=cat?cat.d:(r.destino?1:0);let destino=null;
+      if(d!==0){const cod=ev("dcod");if(!cod){toast("Este gasto exige destino");return;}destino={tipo:d===2?"clase":ev("dtipo"),codigo:cod};}
+      const cambios={date:f,amount:monto,destino,supplier:ev("proveedor"),method:ev("metodo")||"Efectivo",description:ev("notas")||ev("categoria"),updatedAt:ahora()};
+      if(cat){cambios.category=cat.c;cambios.linea=cat.l;}
+      await updateDoc(doc(db,"records",r.id),cambios);
+      return "✓ Gasto corregido"+avisoCierre(dest.tipo==="pieza"&&dest.codigo,destino&&destino.tipo==="pieza"&&destino.codigo);},
+    borrar:async()=>{if(!confirm(`¿Borrar este gasto de ${money(r.amount)}? También desaparece del libro general.`))return;
+      await deleteDoc(doc(db,"records",r.id));return "✓ Gasto borrado";}});
+}
+function editarMov(id){
+  const m=D.material.find(x=>x.id===id);if(!m){toast("Ese movimiento ya no existe");return;}
+  if(m.tipo==="entrada"&&m.recordId){const r=D.records.find(x=>x.id===m.recordId);if(r)return editarCompra(r,m);}
+  if(m.tipo==="ajuste"){
+    if(m.conteo&&D.conteos.some(c=>c.id===m.conteo))return editarConteo(m.conteo);
+    return abrirHoja("Ajuste sin conteo",[],{nota:"Este ajuste no tiene un conteo enlazado. El ajuste no se digita: si está mal, bórralo y cuenta el cajón de nuevo.",
+      borrar:async()=>{if(!confirm(`¿Borrar el ajuste de ${gramos(m.gramos)}?`))return;await deleteDoc(doc(db,"taller_material",m.id));return "✓ Ajuste borrado";}});
+  }
+  const esSalida=m.tipo==="salida",esMerma=m.tipo==="merma";
+  const pz=m.destino&&m.destino.tipo==="pieza"?m.destino.codigo:"";
+  const campos=[{k:"fecha",l:"Fecha",t:"date",v:m.fecha}];
+  if(esSalida)campos.push({k:"pieza",l:"Pieza",t:"select",o:oPiezas(pz),v:pz});
+  campos.push({k:"material",l:"Material",t:"select",o:oMateriales(),v:m.material});
+  campos.push({k:"gramos",l:"Gramos",t:"num",v:m.gramos,h:"Los decimales van con coma: 0,125."});
+  if(esMerma){campos.push({k:"causa",l:"Causa",t:"select",o:CAUSAS.map(x=>[x,x]),v:m.causa});
+    campos.push({k:"pieza",l:"Pieza (si se sabe)",t:"select",o:[["","—"]].concat(oPiezas(pz)),v:pz});}
+  campos.push({k:"notas",l:"Notas",t:"text",v:m.notas});
+  const titulo={salida:"Corregir salida a pieza",merma:"Corregir merma",recuperacion:"Corregir recuperación",entrada:"Corregir entrada"}[m.tipo]||"Corregir movimiento";
+  abrirHoja(titulo,campos,{
+    nota:(esSalida||esMerma)?"Si cambias la fecha o el material, el gramo se vuelve a valorar al costo promedio de ese día. Si no, conserva el precio con que se valoró.":"",
+    guardar:async()=>{
+      const f=ev("fecha"),mat=ev("material"),g=num(ev("gramos"));
+      if(!f||!mat||g<=0){toast("Faltan fecha, material o gramos");return;}
+      const cambios={fecha:f,material:mat,gramos:g,notas:ev("notas"),updatedAt:ahora()};
+      if(esSalida){const cod=ev("pieza");if(!cod){toast("Falta la pieza");return;}cambios.destino={tipo:"pieza",codigo:cod};
+        const disp=saldo(mat)+(mat===m.material?(Number(m.gramos)||0):0);
+        if(g>disp&&!confirm(`Solo hay ${gramos(disp)} de ese material en el cajón. ¿Guardar de todos modos?`))return;}
+      if(esMerma){if(!ev("causa")){toast("La merma exige causa");return;}cambios.causa=ev("causa");const cod=ev("pieza");cambios.destino=cod?{tipo:"pieza",codigo:cod}:null;}
+      if((esSalida||esMerma)&&(f!==m.fecha||mat!==m.material))cambios.precioRef=costoPromedio(mat,f);
+      await updateDoc(doc(db,"taller_material",m.id),cambios);
+      return "✓ Movimiento corregido"+(esSalida?avisoCierre(pz,cambios.destino.codigo):"");},
+    borrar:async()=>{
+      const txt=esSalida?`¿Borrar esta salida? Los ${gramos(m.gramos)} vuelven al cajón y salen del costo de ${pz}.`:`¿Borrar este movimiento de ${gramos(m.gramos)}?`;
+      if(!confirm(txt))return;await deleteDoc(doc(db,"taller_material",m.id));return "✓ Movimiento borrado"+(esSalida?avisoCierre(pz):"");}});
+}
+function editarConteo(id){
+  const c=D.conteos.find(x=>x.id===id);if(!c){toast("Ese conteo ya no existe");return;}
+  const aj=D.material.find(m=>m.tipo==="ajuste"&&m.conteo===id);
+  const mat=(D.materiales.find(x=>x.codigo===c.material)||{nombre:c.material}).nombre;
+  abrirHoja("Corregir conteo · "+mat,[
+    {k:"fecha",l:"Fecha",t:"date",v:c.fecha},
+    {k:"gramos",l:"Gramos contados",t:"num",v:c.gramosContados,h:"Los decimales van con coma: 0,125."},
+    {k:"notas",l:"Notas",t:"text",v:c.notas}
+  ],{nota:`Cuando se contó, el kardex decía <b>${gramos(c.gramosTeoricos)}</b>. El ajuste se recalcula con los gramos que corrijas.`,
+    guardar:async()=>{
+      const f=ev("fecha"),txt=ev("gramos"),g=num(txt);if(!f||txt===""){toast("Faltan fecha o gramos");return;}
+      const dif=g-(Number(c.gramosTeoricos)||0);const lote=writeBatch(db);
+      lote.update(doc(db,"taller_conteos",id),{fecha:f,gramosContados:g,notas:ev("notas"),updatedAt:ahora()});
+      if(Math.abs(dif)>0.0001){
+        if(aj)lote.update(doc(db,"taller_material",aj.id),{gramos:dif,fecha:f,updatedAt:ahora()});
+        else lote.set(doc(collection(db,"taller_material")),{tipo:"ajuste",material:c.material,gramos:dif,fecha:f,conteo:id,
+          precioRef:Number(c.precioPorGramo)||costoPromedio(c.material),notas:"ajuste por conteo",updatedAt:ahora()});
+      }else if(aj)lote.delete(doc(db,"taller_material",aj.id));
+      await lote.commit();return "✓ Conteo corregido · ajuste "+gramos(dif);},
+    borrar:async()=>{if(!confirm(`¿Borrar este conteo${aj?` y su ajuste de ${gramos(aj.gramos)}`:""}?`))return;
+      const lote=writeBatch(db);lote.delete(doc(db,"taller_conteos",id));if(aj)lote.delete(doc(db,"taller_material",aj.id));
+      await lote.commit();return "✓ Conteo borrado";}});
+}
+function editarHoras(id){
+  const h=D.horas.find(x=>x.id===id);if(!h){toast("Ese registro ya no existe");return;}
+  const dest=h.destino||{};
+  abrirHoja("Corregir horas",[
+    {k:"fecha",l:"Fecha",t:"date",v:h.fecha},
+    {k:"persona",l:"Persona",t:"select",o:oNombres(D.personas).slice(1),v:h.persona},
+    {k:"horas",l:"Horas",t:"num",v:h.horas},
+    {k:"linea",l:"Línea",t:"select",o:[["J1","J1 · piezas y encargos"],["J2","J2 · enseñanza"],["E1","E1 · escultura y platería"]],v:h.linea},
+    {k:"dtipo",l:"Destino",t:"select",o:[["pieza","Una pieza"],["clase","Una clase"]],v:dest.tipo||"pieza"},
+    {k:"dcod",l:"¿Cuál?",t:"select",o:[],v:""},
+    {k:"notas",l:"Notas",t:"text",v:h.notas}
+  ],{despues:()=>{let primera=true;
+      const refrescar=()=>{const val=primera?dest.codigo:ev("dcod");primera=false;
+        llenarSel("e_dcod",ev("dtipo")==="clase"?oClases():oPiezas(dest.codigo),val);};
+      $("e_dtipo").onchange=refrescar;refrescar();},
+    guardar:async()=>{
+      const f=ev("fecha"),per=ev("persona"),hh=num(ev("horas")),cod=ev("dcod"),esClase=ev("dtipo")==="clase";
+      if(!f||!per||hh<=0){toast("Faltan fecha, persona u horas");return;}
+      if(!cod){toast("Falta el destino");return;}
+      await updateDoc(doc(db,"taller_horas",id),{fecha:f,persona:per,horas:hh,linea:ev("linea"),
+        destino:{tipo:esClase?"clase":"pieza",codigo:cod},tipo:esClase?"enseñanza":"produccion",notas:ev("notas"),updatedAt:ahora()});
+      return "✓ Horas corregidas"+avisoCierre(dest.tipo==="pieza"&&dest.codigo,!esClase&&cod);},
+    borrar:async()=>{if(!confirm(`¿Borrar estas ${h.horas} h de ${h.persona||"—"}?`))return;
+      await deleteDoc(doc(db,"taller_horas",id));return "✓ Horas borradas";}});
+}
+function editarPieza(cod){
+  document.querySelector('.tab[data-v="capturar"]').click();
+  abrirFormulario("pieza");
+  $("p_existente").value=cod;$("p_existente").onchange();
+}
+document.addEventListener("click",e=>{
+  const it=e.target.closest("[data-ed]");if(!it)return;
+  const i=it.dataset.ed.indexOf(":"),kind=it.dataset.ed.slice(0,i),id=it.dataset.ed.slice(i+1);
+  ({registro:editarRegistro,mov:editarMov,conteo:editarConteo,horas:editarHoras,pieza:editarPieza})[kind](id);
 });
 
 /* ---------- fechas por defecto ---------- */
