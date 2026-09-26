@@ -394,7 +394,7 @@ function init(){
   if(escuchando)return;escuchando=true;
   const K=(col)=>"taller_"+col;
   const mirar=(col,llave,orden)=>{try{onSnapshot(collection(db,K(col)),s=>{
-      const arr=[];s.forEach(d=>arr.push({id:d.id,...d.data()}));
+      const arr=[];s.forEach(d=>arr.push(col==="piezas"?{id:d.id,codigo:d.id,...d.data()}:{id:d.id,...d.data()}));
       if(orden)arr.sort(orden);D[llave]=arr;if(col==="materiales"&&!arr.length&&!sembrado){sembrado=true;sembrar();}pintar();
     },e=>{roto=true;dot("err",e.code||"error");});}catch(e){dot("err",e.message);}};
   try{
@@ -624,7 +624,7 @@ $("p_guardar").onclick=async()=>{
   const seleccion=$("p_existente").value;
   if(!seleccion&&D.piezas.some(p=>p.codigo===cod)){toast("Ese código ya existe: elige la pieza en la lista de arriba para editarla");return;}
   const existente=D.piezas.find(p=>p.codigo===cod);
-  const base={nombre:nom,linea:lin,materialPrincipal:mat,estado:est,cliente:$("p_cliente").value||"",encargo:$("p_encargo").value||"",
+  const base={codigo:cod,nombre:nom,linea:lin,materialPrincipal:mat,estado:est,cliente:$("p_cliente").value||"",encargo:$("p_encargo").value||"",
     notas:$("p_notas").value||"",updatedAt:new Date().toISOString()};
   $("p_guardar").disabled=true;
   try{
