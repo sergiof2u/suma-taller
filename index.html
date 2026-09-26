@@ -159,7 +159,7 @@ button.plain{background:none;border:1px solid var(--line);color:var(--ink)}
         <h2>Pieza</h2>
         <div class="field"><label>Pieza existente</label><select id="p_existente"><option value="">— nueva pieza —</option></select></div>
         <div class="row2">
-          <div class="field"><label>Código</label><input type="text" id="p_codigo"></div>
+          <div class="field"><label>Código</label><input type="text" id="p_codigo" readonly title="Consecutivo automático: línea, año y número"></div>
           <div class="field"><label>Línea</label><select id="p_linea"><option value="J1">J1 · joyería</option><option value="E1">E1 · escultura y platería</option></select></div>
         </div>
         <div class="field"><label>Nombre</label><input type="text" id="p_nombre" placeholder="anillo, aretes, colgante…"></div>
@@ -437,6 +437,7 @@ function pintar(){
   fill("m_pieza",[{codigo:"",nombre:"—"}].concat(pz),o=>o.codigo,o=>o.codigo?o.codigo+" · "+(o.nombre||""):"—");
   fill("h_clase",D.clases,o=>o.codigo,o=>o.codigo+" · "+(o.nombre||""));
   fill("p_existente",[{codigo:"",nombre:""}].concat(D.piezas),o=>o.codigo,o=>o.codigo?o.codigo+" · "+(o.nombre||""):"— nueva pieza —");
+  if(!$("p_existente").value)$("p_codigo").value=proximoCodigo($("p_linea").value);
   const dl=$("lista_encargos");if(dl)dl.innerHTML=[...new Set(D.piezas.map(p=>p.encargo).filter(Boolean))].map(e=>`<option value="${esc(e)}">`).join("");
 
   /* caja */
@@ -618,7 +619,7 @@ $("p_existente").onchange=()=>{const c=$("p_existente").value;if(!c){$("p_codigo
   $("p_cliente").value=p.cliente||"";$("p_encargo").value=p.encargo||"";$("p_notas").value=p.notas||"";
   $("p_res").innerHTML=`${gramos(gramosDe(c))} · costo <b>${money(costoDe(c))}</b>${p.cierre?" · cerrado: "+money(p.cierre.costo):""}`;};
 $("p_guardar").onclick=async()=>{
-  const cod=($("p_codigo").value||"").trim(),lin=$("p_linea").value,nom=$("p_nombre").value.trim(),mat=$("p_material").value,est=$("p_estado").value;
+  const lin=$("p_linea").value,cod=$("p_existente").value||proximoCodigo(lin),nom=$("p_nombre").value.trim(),mat=$("p_material").value,est=$("p_estado").value;
   if(!cod||!nom){toast("Faltan código y nombre");return;}
   const precio=num($("p_precio").value);
   const seleccion=$("p_existente").value;
@@ -648,7 +649,8 @@ $("p_guardar").onclick=async()=>{
           notas:"metal devuelto por pieza descartada",updatedAt:new Date().toISOString()});});
       await lote.commit();
     }
-    $("p_res").innerHTML="Guardada.";toast(existente?"✓ Pieza actualizada":"✓ Pieza creada");
+    if(existente){$("p_res").innerHTML="Guardada.";toast("✓ Pieza actualizada");}
+    else{["p_nombre","p_precio","p_encargo","p_notas"].forEach(id=>$(id).value="");$("p_res").innerHTML="Creada con el código <b>"+esc(cod)+"</b>.";toast("✓ Pieza creada: "+cod);}
   }catch(e){toast("⚠ "+e.message);}
   $("p_guardar").disabled=false;
 };
