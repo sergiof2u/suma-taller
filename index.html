@@ -203,6 +203,7 @@ button.plain{background:none;border:1px solid var(--line);color:var(--ink)}
           <label>Destino</label>
           <select id="g_dest_tipo"><option value="pieza">Una pieza</option><option value="material">El material del cajón</option><option value="clase">Una clase</option></select>
           <select id="g_dest_cod" style="margin-top:8px"></select>
+          <button class="ghost" data-add="clases" id="g_add_clase" type="button" hidden>Añadir clase (código y nombre)</button>
           <div class="hint">Un costo directo sin destino es un costo que no se le puede cobrar a nada.</div>
         </div>
         <div class="field"><label>Monto</label><input type="text" inputmode="decimal" id="g_monto" placeholder="0"></div>
@@ -509,6 +510,7 @@ function pintarDestinoGasto(){
   $("g_dest_wrap").hidden=(cat.d===0);
   if(cat.d===0)return;
   $("g_dest_tipo").hidden=(cat.d===2);
+  $("g_add_clase").hidden=!(cat.d===2||$("g_dest_tipo").value==="clase");
   if(cat.d===2){$("g_dest_tipo").value="clase";fill("g_dest_cod",D.clases,o=>o.codigo,o=>o.codigo+" · "+(o.nombre||""));return;}
   const tipo=$("g_dest_tipo").value;
   if(tipo==="material")fill("g_dest_cod",D.materiales,o=>o.codigo,o=>o.nombre);
