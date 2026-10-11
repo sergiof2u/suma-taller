@@ -993,6 +993,8 @@ document.addEventListener("click",e=>{
 /* ---------- clases y sus cobros ---------- */
 // El cobro de una clase es un ingreso del libro general con línea J2 y destino la clase: se anota aquí y no en el financiero.
 const FUENTE_CLASE="Clase · Joyería";
+// Quien dicta la clase va en «Artesano o artista», como en los cobros de clase que ya había en el financiero.
+const PROFE_CLASE="Sergio";
 const pesos=n=>(Number(n)||0)?(Number(n)||0).toLocaleString("es-CO",{maximumFractionDigits:0}):"";
 const esCobro=r=>r.type==="income"&&r.destino&&r.destino.tipo==="clase";
 function proximoCodigoClase(){const pre="J2-"+String(new Date().getFullYear()).slice(2)+"-";
@@ -1011,7 +1013,7 @@ function resumenClase(cod){
     alumnos:new Set(cobros.map(r=>r.alumno).filter(Boolean)).size};
 }
 function registroCobro(f,cod,al,vc,vm,met,notas){const c=D.clases.find(x=>x.codigo===cod)||{};
-  return {type:"income",date:f,quantity:1,unitAmount:vc+vm,amount:vc+vm,source:FUENTE_CLASE,method:met||"Efectivo",person:"",status:"Pagado",ambito:"Suma",
+  return {type:"income",date:f,quantity:1,unitAmount:vc+vm,amount:vc+vm,source:FUENTE_CLASE,method:met||"Efectivo",person:PROFE_CLASE,status:"Pagado",ambito:"Suma",
     category:"",supplier:"",description:`${cod}${c.nombre?" "+c.nombre:""} · ${al}${notas?" · "+notas:""}`,
     linea:"J2",unidad:"unidad",destino:{tipo:"clase",codigo:cod},alumno:al,valorClase:vc,valorMaterial:vm,notas:notas||"",updatedAt:ahora()};}
 function textoMaterialAlumno(cod,al){if(!cod||!al)return "";const ss=salidasClase(cod,al);
@@ -1053,6 +1055,7 @@ $("cl_guardar").onclick=async()=>{
   if(g>0&&!mat){toast("Elige el material que usó");return;}
   if(mat&&g<=0){toast("Escribe los gramos que usó, o deja el material en «sin material»");return;}
   if(vc+vm<=0&&g<=0){toast("No hay nada que guardar: ni cobro ni material");return;}
+  if(vc<=0&&!yaPagoClase(nueva?"":$("cl_clase").value,al)&&!confirm("El valor de la clase está en cero: solo se cobra el material. ¿Guardar así?"))return;
   if(g>saldo(mat)&&!confirm(`Solo hay ${gramos(saldo(mat))} de ese material en el cajón. ¿Guardar de todos modos?`))return;
   const cod=nueva?proximoCodigoClase():$("cl_clase").value;
   if(nueva&&D.clases.some(c=>c.codigo===cod)){toast("Ese código ya existe: recarga la página");return;}
