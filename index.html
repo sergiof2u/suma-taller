@@ -132,7 +132,7 @@ button.plain{background:none;border:1px solid var(--line);color:var(--ink)}
         <div class="field"><label>Clase</label><select id="co_clase"></select>
           <div class="hint">Si la clase no está, créala primero en <b>Clase</b>.</div></div>
         <div class="field"><label>Alumno</label><select id="co_alumno"></select>
-          <button class="ghost" data-add="personas" type="button">Añadir persona</button></div>
+          <button class="ghost" data-add="personas" type="button">Añadir alumno</button></div>
         <div class="row2">
           <div class="field"><label>Valor de la clase</label><input type="text" inputmode="decimal" id="co_valor" placeholder="0"></div>
           <div class="field"><label>Material</label><input type="text" inputmode="decimal" id="co_material" placeholder="0"></div>
@@ -171,8 +171,9 @@ button.plain{background:none;border:1px solid var(--line);color:var(--ink)}
           <div class="hint">Si la pieza no está, créala primero en <b>Pieza</b>.</div></div>
         <div class="field" id="s_clase_wrap" hidden><label>Clase</label><select id="s_clase"></select>
           <button class="ghost" data-add="clases" type="button">Añadir clase</button>
-          <label style="margin-top:8px">Alumno <span class="hint" style="display:inline">(si el material es de uno solo)</span></label><select id="s_alumno"></select>
-          <div class="hint">Lo que pagan los alumnos se anota en <b>Cobro de clase</b>.</div></div>
+          <label style="margin-top:8px">Alumno que usó este material</label><select id="s_alumno"></select>
+          <button class="ghost" data-add="personas" type="button">Añadir alumno</button>
+          <div class="hint">Elegir el alumno sirve para saber cuánto cobrarle de material. Si el material se repartió entre varios, déjalo en «—». Lo que pagan se anota en <b>Cobro de clase</b>.</div></div>
         <div class="field"><label>Material</label><select id="s_material"></select></div>
         <div class="field"><label>Gramos</label><input type="text" inputmode="decimal" id="s_gramos" placeholder="0"></div>
         <div class="hint">Los decimales van con coma: 0,125. Si escribes con punto, el punto separa miles.</div>
@@ -777,7 +778,7 @@ $("k_guardar").onclick=async()=>{
 /* ---------- añadir a los catálogos ---------- */
 document.querySelectorAll("[data-add]").forEach(b=>b.onclick=async()=>{
   const col=b.dataset.add;
-  const nombre=prompt(col==="clases"?"Nombre de la clase (el código se pone solo). Para el valor y el tipo, usa el formulario Clase.":"Nombre para añadir a la lista");
+  const nombre=prompt(col==="clases"?"Nombre de la clase (el código se pone solo). Para el valor y el tipo, usa el formulario Clase.":(col==="personas"?"Nombre de la persona (alumno, cliente o quien trabaja en el taller)":"Nombre para añadir a la lista"));
   if(!nombre)return;
   try{
     if(col==="clases"){const cod=proximoCodigoClase();await setDoc(doc(db,"taller_clases",cod),{codigo:cod,nombre:nombre.trim(),tipo:"sesión",fecha:hoy(),creado:ahora()});toast("✓ Clase creada: "+cod);return;}
