@@ -97,7 +97,7 @@ button.plain{background:none;border:1px solid var(--line);color:var(--ink)}
     <section id="v-capturar">
       <div class="gl">
         <button class="bt" data-f="compra">＋ Compra de material</button>
-        <button class="bt" data-f="salida">→ Salida a pieza</button>
+        <button class="bt" data-f="salida">→ Salida</button>
         <button class="bt" data-f="horas">◷ Horas</button>
         <button class="bt" data-f="pieza">◇ Pieza</button>
         <button class="bt" data-f="merma">✕ Merma</button>
@@ -125,10 +125,15 @@ button.plain{background:none;border:1px solid var(--line);color:var(--ink)}
       </div>
 
       <div class="card form" id="f-salida" hidden>
-        <h2>Salida de material a una pieza</h2>
+        <h2>Salida de material</h2>
         <div class="field"><label>Fecha</label><input type="date" id="s_fecha"></div>
-        <div class="field"><label>Pieza</label><select id="s_pieza"></select>
+        <div class="field"><label>Destino</label>
+          <select id="s_destino_tipo"><option value="pieza">Una pieza</option><option value="clase">Una clase (lo compran los alumnos)</option></select></div>
+        <div class="field" id="s_pieza_wrap"><label>Pieza</label><select id="s_pieza"></select>
           <div class="hint">Si la pieza no está, créala primero en <b>Pieza</b>.</div></div>
+        <div class="field" id="s_clase_wrap" hidden><label>Clase</label><select id="s_clase"></select>
+          <button class="ghost" data-add="clases" type="button">Añadir clase (código y nombre)</button>
+          <div class="hint">El pago de los alumnos se anota en el programa financiero y se enlaza a la clase.</div></div>
         <div class="field"><label>Material</label><select id="s_material"></select></div>
         <div class="field"><label>Gramos</label><input type="text" inputmode="decimal" id="s_gramos" placeholder="0"></div>
         <div class="hint">Los decimales van con coma: 0,125. Si escribes con punto, el punto separa miles.</div>
@@ -436,6 +441,7 @@ function pintar(){
   fill("s_pieza",pz,o=>o.codigo,o=>o.codigo+" · "+(o.nombre||""));
   fill("h_pieza",pz,o=>o.codigo,o=>o.codigo+" · "+(o.nombre||""));
   fill("m_pieza",[{codigo:"",nombre:"—"}].concat(pz),o=>o.codigo,o=>o.codigo?o.codigo+" · "+(o.nombre||""):"—");
+  fill("s_clase",D.clases,o=>o.codigo,o=>o.codigo+" · "+(o.nombre||""));
   fill("h_clase",D.clases,o=>o.codigo,o=>o.codigo+" · "+(o.nombre||""));
   fill("p_existente",[{codigo:"",nombre:""}].concat(D.piezas),o=>o.codigo,o=>o.codigo?o.codigo+" · "+(o.nombre||""):"— nueva pieza —");
   if(!$("p_existente").value)$("p_codigo").value=proximoCodigo($("p_linea").value);
@@ -454,7 +460,7 @@ function pintar(){
 
   const kk=D.material.slice().sort((a,b)=>(b.fecha||"").localeCompare(a.fecha||""));
   $("kmovs").innerHTML=kk.length?kk.slice(0,60).map(m=>{const mat=D.materiales.find(x=>x.codigo===m.material)||{nombre:m.material};
-    const et={entrada:"entrada",salida:"a pieza",merma:"merma",recuperacion:"recuperación",ajuste:"ajuste"}[m.tipo]||m.tipo;
+    const et={entrada:"entrada",salida:(m.destino&&m.destino.tipo==="clase")?"a clase":"a pieza",merma:"merma",recuperacion:"recuperación",ajuste:"ajuste"}[m.tipo]||m.tipo;
     const signo=(m.tipo==="salida"||m.tipo==="merma")?"−":"+";
     return `<div class="item ed" data-ed="mov:${esc(m.id)}"><div class="row"><div><div class="t">${esc(mat.nombre||m.material)} <span class="tag">${et}</span></div><div class="m">${fecha(m.fecha)}${m.destino&&m.destino.codigo?" · "+esc(m.destino.codigo):""}${m.causa?" · "+esc(m.causa):""}${m.precioRef?" · "+money(m.precioRef)+"/g":""}</div></div><div class="r">${signo}${gramos(Math.abs(Number(m.gramos)||0))}</div></div></div>`}).join(""):'<div class="empty">Sin movimientos.</div>';
 
@@ -575,18 +581,23 @@ $("c_guardar").onclick=async()=>{
   $("c_guardar").disabled=false;
 };
 
-/* ---------- guardar: salida a pieza ---------- */
-function pintarResSalida(){const mat=$("s_material").value,g=num($("s_gramos").value),cod=$("s_pieza").value;
+/* ---------- guardar: salida a pieza o a clase ---------- */
+// A una clase sale el metal que compran los alumnos: se valora al costo del cajón, sin la merma de la pieza.
+const sEsClase=()=>$("s_destino_tipo").value==="clase";
+function pintarResSalida(){const mat=$("s_material").value,g=num($("s_gramos").value),esClase=sEsClase(),cod=esClase?$("s_clase").value:$("s_pieza").value;
   const cp=costoPromedio(mat,$("s_fecha").value),mer=mermaDeMaterial(mat);
-  $("s_res").innerHTML=g>0?`Se valora a <b>${money(cp)}</b> el gramo (costo promedio del cajón): <b>${money(g*cp)}</b> de metal, <b>${money(g*cp*(1+mer))}</b> al costo de la pieza con la merma del ${Math.round(mer*100)} %${cod?` para ${esc(cod)}`:""}. Quedan ${gramos(saldo(mat))} en el cajón.`:"Escribe los gramos.";}
-$("s_material").onchange=$("s_gramos").oninput=$("s_pieza").onchange=pintarResSalida;
+  $("s_res").innerHTML=g>0?(esClase
+    ?`Se valora a <b>${money(cp)}</b> el gramo (costo promedio del cajón): <b>${money(g*cp)}</b> de metal${cod?` para la clase ${esc(cod)}`:""}. Es lo mínimo que deben pagar los alumnos por ese metal. Quedan ${gramos(saldo(mat))} en el cajón.`
+    :`Se valora a <b>${money(cp)}</b> el gramo (costo promedio del cajón): <b>${money(g*cp)}</b> de metal, <b>${money(g*cp*(1+mer))}</b> al costo de la pieza con la merma del ${Math.round(mer*100)} %${cod?` para ${esc(cod)}`:""}. Quedan ${gramos(saldo(mat))} en el cajón.`):"Escribe los gramos.";}
+$("s_material").onchange=$("s_gramos").oninput=$("s_pieza").onchange=$("s_clase").onchange=pintarResSalida;
+$("s_destino_tipo").onchange=()=>{const c=sEsClase();$("s_clase_wrap").hidden=!c;$("s_pieza_wrap").hidden=c;pintarResSalida();};
 $("s_guardar").onclick=async()=>{
-  const fechaV=$("s_fecha").value,mat=$("s_material").value,g=num($("s_gramos").value),cod=$("s_pieza").value;
-  if(!fechaV||!mat||g<=0||!cod){toast("Faltan fecha, pieza, material o gramos");return;}
+  const fechaV=$("s_fecha").value,mat=$("s_material").value,g=num($("s_gramos").value),esClase=sEsClase(),cod=esClase?$("s_clase").value:$("s_pieza").value;
+  if(!fechaV||!mat||g<=0||!cod){toast(`Faltan fecha, ${esClase?"clase":"pieza"}, material o gramos`);return;}
   if(g>saldo(mat)&&!confirm(`Solo hay ${gramos(saldo(mat))} de ese material en el cajón. ¿Guardar de todos modos?`))return;
   const cp=costoPromedio(mat,fechaV);$("s_guardar").disabled=true;
   try{await addDoc(collection(db,"taller_material"),{tipo:"salida",material:mat,gramos:g,fecha:fechaV,precioRef:cp,
-      destino:{tipo:"pieza",codigo:cod},notas:$("s_notas").value,updatedAt:new Date().toISOString()});
+      destino:{tipo:esClase?"clase":"pieza",codigo:cod},notas:$("s_notas").value,updatedAt:new Date().toISOString()});
     $("s_gramos").value="";$("s_notas").value="";$("s_res").innerHTML="–";toast("✓ Salida guardada");
   }catch(e){toast("⚠ "+e.message);}
   $("s_guardar").disabled=false;
@@ -641,7 +652,7 @@ $("p_guardar").onclick=async()=>{
     else await setDoc(doc(db,"taller_piezas",cod),{...base,creado:new Date().toISOString(),precioVitrina:hist});
     if(est==="descartada"&&!(existente&&existente.estado==="descartada")){
       const porMaterial={};
-      D.material.filter(m=>m.tipo==="salida"&&m.destino&&m.destino.codigo===cod).forEach(m=>{
+      D.material.filter(m=>m.tipo==="salida"&&m.destino&&m.destino.tipo==="pieza"&&m.destino.codigo===cod).forEach(m=>{
         const g=Number(m.gramos)||0,p=Number(m.precioRef)||0;
         porMaterial[m.material]=porMaterial[m.material]||{g:0,v:0};porMaterial[m.material].g+=g;porMaterial[m.material].v+=g*p;});
       const lote=writeBatch(db);
@@ -827,29 +838,35 @@ function editarMov(id){
   }
   const esSalida=m.tipo==="salida",esMerma=m.tipo==="merma";
   const pz=m.destino&&m.destino.tipo==="pieza"?m.destino.codigo:"";
+  const dest=m.destino||{};
   const campos=[{k:"fecha",l:"Fecha",t:"date",v:m.fecha}];
-  if(esSalida)campos.push({k:"pieza",l:"Pieza",t:"select",o:oPiezas(pz),v:pz});
+  if(esSalida){campos.push({k:"dtipo",l:"Destino",t:"select",o:[["pieza","Una pieza"],["clase","Una clase (lo compran los alumnos)"]],v:dest.tipo||"pieza"});
+    campos.push({k:"dcod",l:"¿Cuál?",t:"select",o:[],v:""});}
   campos.push({k:"material",l:"Material",t:"select",o:oMateriales(),v:m.material});
   campos.push({k:"gramos",l:"Gramos",t:"num",v:m.gramos,h:"Los decimales van con coma: 0,125."});
   if(esMerma){campos.push({k:"causa",l:"Causa",t:"select",o:CAUSAS.map(x=>[x,x]),v:m.causa});
     campos.push({k:"pieza",l:"Pieza (si se sabe)",t:"select",o:[["","—"]].concat(oPiezas(pz)),v:pz});}
   campos.push({k:"notas",l:"Notas",t:"text",v:m.notas});
-  const titulo={salida:"Corregir salida a pieza",merma:"Corregir merma",recuperacion:"Corregir recuperación",entrada:"Corregir entrada"}[m.tipo]||"Corregir movimiento";
+  const titulo={salida:"Corregir salida",merma:"Corregir merma",recuperacion:"Corregir recuperación",entrada:"Corregir entrada"}[m.tipo]||"Corregir movimiento";
   abrirHoja(titulo,campos,{
+    despues:esSalida?()=>{let primera=true;
+      const refrescar=()=>{const val=primera?dest.codigo:ev("dcod");primera=false;
+        llenarSel("e_dcod",ev("dtipo")==="clase"?oClases():oPiezas(pz),val);};
+      $("e_dtipo").onchange=refrescar;refrescar();}:undefined,
     nota:(esSalida||esMerma)?"Si cambias la fecha o el material, el gramo se vuelve a valorar al costo promedio de ese día. Si no, conserva el precio con que se valoró.":"",
     guardar:async()=>{
       const f=ev("fecha"),mat=ev("material"),g=num(ev("gramos"));
       if(!f||!mat||g<=0){toast("Faltan fecha, material o gramos");return;}
       const cambios={fecha:f,material:mat,gramos:g,notas:ev("notas"),updatedAt:ahora()};
-      if(esSalida){const cod=ev("pieza");if(!cod){toast("Falta la pieza");return;}cambios.destino={tipo:"pieza",codigo:cod};
+      if(esSalida){const cod=ev("dcod"),tipo=ev("dtipo")==="clase"?"clase":"pieza";if(!cod){toast("Falta el destino");return;}cambios.destino={tipo,codigo:cod};
         const disp=saldo(mat)+(mat===m.material?(Number(m.gramos)||0):0);
         if(g>disp&&!confirm(`Solo hay ${gramos(disp)} de ese material en el cajón. ¿Guardar de todos modos?`))return;}
       if(esMerma){if(!ev("causa")){toast("La merma exige causa");return;}cambios.causa=ev("causa");const cod=ev("pieza");cambios.destino=cod?{tipo:"pieza",codigo:cod}:null;}
       if((esSalida||esMerma)&&(f!==m.fecha||mat!==m.material))cambios.precioRef=costoPromedio(mat,f);
       await updateDoc(doc(db,"taller_material",m.id),cambios);
-      return "✓ Movimiento corregido"+(esSalida?avisoCierre(pz,cambios.destino.codigo):"");},
+      return "✓ Movimiento corregido"+(esSalida?avisoCierre(pz,cambios.destino.tipo==="pieza"&&cambios.destino.codigo):"");},
     borrar:async()=>{
-      const txt=esSalida?`¿Borrar esta salida? Los ${gramos(m.gramos)} vuelven al cajón y salen del costo de ${pz}.`:`¿Borrar este movimiento de ${gramos(m.gramos)}?`;
+      const txt=esSalida?`¿Borrar esta salida? Los ${gramos(m.gramos)} vuelven al cajón y salen del costo de ${dest.codigo||"—"}.`:`¿Borrar este movimiento de ${gramos(m.gramos)}?`;
       if(!confirm(txt))return;await deleteDoc(doc(db,"taller_material",m.id));return "✓ Movimiento borrado"+(esSalida?avisoCierre(pz):"");}});
 }
 function editarConteo(id){
