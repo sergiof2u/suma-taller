@@ -523,8 +523,9 @@ function pintar(){
   $("lclases").innerHTML=D.clases.length?D.clases.map(c=>{const x=resumenClase(c.codigo);
     return `<div class="item ed" data-ed="clase:${esc(c.codigo)}"><div class="row"><div><div class="t">${esc(c.codigo)} · ${esc(c.nombre||"")}</div>
       <div class="m"><span class="tag">${esc(c.tipo||"sesión")}</span> ${c.fecha?fecha(c.fecha):""}${c.valor?" · "+money(c.valor)+" por alumno":""}</div>
-      <div class="m">${x.alumnos} ${x.alumnos===1?"alumno":"alumnos"} · cobrado ${money(x.cobrado)}${x.g?" · material "+gramos(x.g)+" ("+money(x.mat)+")":""}${x.horas?" · "+x.horas.toLocaleString("es-CO")+" h":""}</div></div>
-      <div class="r">${money(x.resultado)}</div></div></div>`}).join(""):'<div class="empty">Todavía no hay clases.</div>';
+      <div class="m">${x.alumnos} ${x.alumnos===1?"alumno":"alumnos"} · clase ${money(x.cobClase)}${x.horas?" · "+x.horas.toLocaleString("es-CO")+" h":""}</div>
+      ${x.g||x.cobMat?`<div class="m">material: ${gramos(x.g)}, costo ${money(x.mat)} · cobrado ${money(x.cobMat)}</div>`:""}</div>
+      <div class="r">${money(x.cobClase)}</div></div></div>`}).join(""):'<div class="empty">Todavía no hay clases.</div>';
   const cb=D.records.filter(esCobro).sort((a,b)=>(b.date||"").localeCompare(a.date||""));
   $("lcobros").innerHTML=cb.length?cb.slice(0,80).map(r=>`<div class="item ed" data-ed="cobro:${esc(r.id)}"><div class="row"><div><div class="t">${esc(r.alumno||"—")}</div><div class="m">${fecha(r.date)} · ${esc(r.destino.codigo)} · clase ${money(r.valorClase)} · material ${money(r.valorMaterial)}</div></div><div class="r">${money(r.amount)}</div></div></div>`).join(""):'<div class="empty">Todavía no hay cobros.</div>';
 
@@ -888,6 +889,8 @@ function editarGasto(r){
 }
 function editarMov(id){
   const m=D.material.find(x=>x.id===id);if(!m){toast("Ese movimiento ya no existe");return;}
+  // La salida que se guardó con un cobro de clase se corrige y se borra junto con él.
+  const cobro=m.tipo==="salida"&&D.records.find(r=>esCobro(r)&&r.salidaId===id);if(cobro)return editarCobro(cobro.id);
   if(m.tipo==="entrada"&&m.recordId){const r=D.records.find(x=>x.id===m.recordId);if(r)return editarCompra(r,m);}
   if(m.tipo==="ajuste"){
     if(m.conteo&&D.conteos.some(c=>c.id===m.conteo))return editarConteo(m.conteo);
@@ -1005,7 +1008,7 @@ function resumenClase(cod){
   const horas=D.horas.filter(h=>h.destino&&h.destino.tipo==="clase"&&h.destino.codigo===cod).reduce((a,h)=>a+(Number(h.horas)||0),0);
   const mat=valorSalidas(ss),g=gramosSalidas(ss);
   return {cobros,cobClase,cobMat,cobrado:cobClase+cobMat,gastos,horas,mat,g,salidas:ss,
-    alumnos:new Set(cobros.map(r=>r.alumno).filter(Boolean)).size,resultado:cobClase+cobMat-mat-gastos};
+    alumnos:new Set(cobros.map(r=>r.alumno).filter(Boolean)).size};
 }
 function registroCobro(f,cod,al,vc,vm,met,notas){const c=D.clases.find(x=>x.codigo===cod)||{};
   return {type:"income",date:f,quantity:1,unitAmount:vc+vm,amount:vc+vm,source:FUENTE_CLASE,method:met||"Efectivo",person:"",status:"Pagado",ambito:"Suma",
@@ -1079,9 +1082,10 @@ function editarClase(cod){
   const filas=x.cobros.slice().sort((a,b)=>(a.date||"").localeCompare(b.date||"")).map(r=>`<div class="item ed" data-ed="cobro:${esc(r.id)}"><div class="row"><div><div class="t">${esc(r.alumno||"—")}</div><div class="m">${fecha(r.date)} · clase ${money(r.valorClase)} · material ${money(r.valorMaterial)}</div></div><div class="r">${money(r.amount)}</div></div></div>`).join("");
   const sal=x.salidas.map(m=>{const mat=D.materiales.find(y=>y.codigo===m.material)||{nombre:m.material};
     return `<div class="m">${fecha(m.fecha)} · ${esc(mat.nombre||m.material)} · ${gramos(m.gramos)} · ${money((Number(m.gramos)||0)*(Number(m.precioRef)||0))}${m.alumno?" · "+esc(m.alumno):""}</div>`;}).join("");
-  const nota=`<b>${esc(cod)}</b><br>Cobrado: clase <b>${money(x.cobClase)}</b> + material <b>${money(x.cobMat)}</b> = <b>${money(x.cobrado)}</b><br>
-    Material que salió del cajón: ${gramos(x.g)}, ${money(x.mat)} al costo · gastos de la clase ${money(x.gastos)} · ${x.horas.toLocaleString("es-CO")} h<br>
-    Resultado: <b>${money(x.resultado)}</b> <span class="hint" style="display:inline">(lo cobrado menos material y gastos; las horas no se restan porque aún no tienen tarifa)</span>
+  const nota=`<b>${esc(cod)}</b> · ${x.alumnos} ${x.alumnos===1?"alumno":"alumnos"}<br>
+    <b>La clase:</b> cobrado <b>${money(x.cobClase)}</b> · ${x.horas.toLocaleString("es-CO")} h${x.gastos?` · material entregado sin cobrar ${money(x.gastos)}`:""}<br>
+    <b>El material, aparte:</b> salieron ${gramos(x.g)} del cajón, que costaron <b>${money(x.mat)}</b> · se cobraron <b>${money(x.cobMat)}</b> · diferencia ${money(x.cobMat-x.mat)}<br>
+    Total cobrado: ${money(x.cobrado)}
     ${sal?`<div style="margin-top:8px"><b>Salidas de material</b>${sal}</div>`:""}
     <div style="margin-top:8px"><b>Cobros</b> <span class="hint" style="display:inline">· toca uno para corregirlo</span>${filas||'<div class="empty">Sin cobros todavía.</div>'}</div>`;
   abrirHoja("Clase · "+(c.nombre||cod),[
@@ -1096,10 +1100,16 @@ function editarClase(cod){
       await updateDoc(doc(db,"taller_clases",cod),{nombre:ev("nombre").trim(),tipo,fecha:ev("fecha"),sesiones:tipo==="curso"?(num(ev("sesiones"))||null):null,
         valor:num(ev("valor")),notas:ev("notas"),updatedAt:ahora()});return "✓ Clase corregida";},
     borrar:async()=>{
-      const usos=x.cobros.length+x.salidas.length+D.horas.filter(h=>h.destino&&h.destino.tipo==="clase"&&h.destino.codigo===cod).length
-        +D.records.filter(r=>r.type==="expense"&&r.destino&&r.destino.tipo==="clase"&&r.destino.codigo===cod).length;
-      if(usos){toast("Esta clase tiene cobros, salidas, horas o gastos: bórralos primero");return;}
-      if(!confirm(`¿Borrar la clase ${cod}?`))return;await deleteDoc(doc(db,"taller_clases",cod));return "✓ Clase borrada";}});
+      const horas=D.horas.filter(h=>h.destino&&h.destino.tipo==="clase"&&h.destino.codigo===cod);
+      const gastos=D.records.filter(r=>r.type==="expense"&&r.destino&&r.destino.tipo==="clase"&&r.destino.codigo===cod);
+      const partes=[x.cobros.length&&`${x.cobros.length} ${x.cobros.length===1?"cobro":"cobros"} (${money(x.cobrado)})`,
+        x.salidas.length&&`${gramos(x.g)} de material, que vuelven al cajón`,horas.length&&`${horas.length} ${horas.length===1?"registro":"registros"} de horas`,
+        gastos.length&&`${gastos.length} ${gastos.length===1?"gasto":"gastos"} (${money(x.gastos)})`].filter(Boolean);
+      if(!confirm(`¿Borrar la clase ${cod}`+(partes.length?` y todo lo que tiene: ${partes.join(", ")}?`:"?")))return;
+      const lote=writeBatch(db);
+      x.cobros.forEach(r=>lote.delete(doc(db,"records",r.id)));gastos.forEach(r=>lote.delete(doc(db,"records",r.id)));
+      x.salidas.forEach(m=>lote.delete(doc(db,"taller_material",m.id)));horas.forEach(h=>lote.delete(doc(db,"taller_horas",h.id)));
+      lote.delete(doc(db,"taller_clases",cod));await lote.commit();return "✓ Clase borrada con todo lo que tenía";}});
 }
 // El cobro y la salida de material que se guardaron juntos se corrigen y se borran juntos.
 function editarCobro(id){
