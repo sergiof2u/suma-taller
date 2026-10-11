@@ -103,6 +103,44 @@ button.plain{background:none;border:1px solid var(--line);color:var(--ink)}
         <button class="bt" data-f="merma">✕ Merma</button>
         <button class="bt" data-f="gasto">$ Otro gasto</button>
         <button class="bt" data-f="conteo">⚖ Conteo</button>
+        <button class="bt" data-f="clase">◎ Clase</button>
+        <button class="bt" data-f="cobro">＄ Cobro de clase</button>
+      </div>
+
+      <div class="card form" id="f-clase" hidden>
+        <h2>Nueva clase</h2>
+        <div class="row2">
+          <div class="field"><label>Código</label><input type="text" id="cl_codigo" readonly title="Consecutivo automático: J2, año y número"></div>
+          <div class="field"><label>Tipo</label><select id="cl_tipo"><option value="sesión">Sesión (un día)</option><option value="curso">Curso (varias sesiones)</option></select></div>
+        </div>
+        <div class="field"><label>Nombre</label><input type="text" id="cl_nombre" placeholder="platería básica, anillo de plata…"></div>
+        <div class="row2">
+          <div class="field"><label id="cl_fecha_l">Fecha</label><input type="date" id="cl_fecha"></div>
+          <div class="field" id="cl_ses_wrap" hidden><label>Sesiones</label><input type="text" inputmode="numeric" id="cl_sesiones" placeholder="4"></div>
+        </div>
+        <div class="field"><label>Valor de la clase por alumno</label><input type="text" inputmode="decimal" id="cl_valor" placeholder="280.000">
+          <div class="hint">Es fijo. El material se cobra aparte, según lo que use cada alumno.</div></div>
+        <div class="field"><label>Notas</label><input type="text" id="cl_notas"></div>
+        <button class="primary" id="cl_guardar">Guardar clase</button>
+        <div class="hint" style="margin-top:8px">Para ver o corregir una clase, tócala en la pestaña <b>Clases</b>.</div>
+      </div>
+
+      <div class="card form" id="f-cobro" hidden>
+        <h2>Cobro de clase</h2>
+        <div class="hint" style="margin-bottom:10px">Entra al libro general como ingreso de «Clase · Joyería». No lo anotes también en el financiero.</div>
+        <div class="field"><label>Fecha</label><input type="date" id="co_fecha"></div>
+        <div class="field"><label>Clase</label><select id="co_clase"></select>
+          <div class="hint">Si la clase no está, créala primero en <b>Clase</b>.</div></div>
+        <div class="field"><label>Alumno</label><select id="co_alumno"></select>
+          <button class="ghost" data-add="personas" type="button">Añadir persona</button></div>
+        <div class="row2">
+          <div class="field"><label>Valor de la clase</label><input type="text" inputmode="decimal" id="co_valor" placeholder="0"></div>
+          <div class="field"><label>Material</label><input type="text" inputmode="decimal" id="co_material" placeholder="0"></div>
+        </div>
+        <div class="res" id="co_res">–</div>
+        <div class="field"><label>Método</label><select id="co_metodo"></select></div>
+        <div class="field"><label>Notas</label><input type="text" id="co_notas"></div>
+        <button class="primary" id="co_guardar">Guardar cobro</button>
       </div>
 
       <div class="card form" id="f-compra" hidden>
@@ -132,8 +170,9 @@ button.plain{background:none;border:1px solid var(--line);color:var(--ink)}
         <div class="field" id="s_pieza_wrap"><label>Pieza</label><select id="s_pieza"></select>
           <div class="hint">Si la pieza no está, créala primero en <b>Pieza</b>.</div></div>
         <div class="field" id="s_clase_wrap" hidden><label>Clase</label><select id="s_clase"></select>
-          <button class="ghost" data-add="clases" type="button">Añadir clase (código y nombre)</button>
-          <div class="hint">El pago de los alumnos se anota en el programa financiero y se enlaza a la clase.</div></div>
+          <button class="ghost" data-add="clases" type="button">Añadir clase</button>
+          <label style="margin-top:8px">Alumno <span class="hint" style="display:inline">(si el material es de uno solo)</span></label><select id="s_alumno"></select>
+          <div class="hint">Lo que pagan los alumnos se anota en <b>Cobro de clase</b>.</div></div>
         <div class="field"><label>Material</label><select id="s_material"></select></div>
         <div class="field"><label>Gramos</label><input type="text" inputmode="decimal" id="s_gramos" placeholder="0"></div>
         <div class="hint">Los decimales van con coma: 0,125. Si escribes con punto, el punto separa miles.</div>
@@ -238,6 +277,7 @@ button.plain{background:none;border:1px solid var(--line);color:var(--ink)}
     <!-- ============ MOVIMIENTOS ============ -->
     <section id="v-movimientos" hidden>
       <div class="card"><h2>Egresos del taller</h2><div class="hint">Toca un registro para corregirlo o borrarlo.</div><div id="movs"><div class="empty">Todavía no hay registros.</div></div></div>
+      <div class="card"><h2>Cobros de clases</h2><div id="lcobros"><div class="empty">Todavía no hay cobros.</div></div></div>
       <div class="card"><h2>Horas</h2><div id="lhoras"><div class="empty">Todavía no hay horas.</div></div></div>
     </section>
 
@@ -251,6 +291,11 @@ button.plain{background:none;border:1px solid var(--line);color:var(--ink)}
     <!-- ============ PIEZAS ============ -->
     <section id="v-piezas" hidden>
       <div class="card"><h2>Piezas</h2><div id="piezas"><div class="empty">Todavía no hay piezas.</div></div></div>
+    </section>
+
+    <!-- ============ CLASES ============ -->
+    <section id="v-clases" hidden>
+      <div class="card"><h2>Clases</h2><div class="hint">Toca una clase para ver su ficha, corregirla y ver sus cobros.</div><div id="lclases"><div class="empty">Todavía no hay clases.</div></div></div>
     </section>
 
     <!-- ============ GUIA ============ -->
@@ -271,6 +316,8 @@ button.plain{background:none;border:1px solid var(--line);color:var(--ink)}
       <div class="card">
         <h2>Las palabras</h2>
         <div class="glos"><b>Destino</b><div>A qué se carga: a una pieza, al material del cajón o a una clase. Es lo que convierte un gasto en costo.</div></div>
+        <div class="glos"><b>Clase</b><div>Una sesión o un curso, con código J2. Lleva un valor fijo por alumno; el material se cobra aparte, según lo que use cada uno.</div></div>
+        <div class="glos"><b>Cobro de clase</b><div>Lo que paga un alumno: el valor de la clase más su material. Entra al libro general como ingreso de «Clase · Joyería» y no se anota también en el financiero.</div></div>
         <div class="glos"><b>Merma provisionada</b><div>El 10 % que se le carga al metal de cada pieza. Cubre que una pieza haya que fundirla dos veces, que el material venga agrio o que se vaya mucha lima. Es previsión del proceso, no una retención.</div></div>
         <div class="glos"><b>Merma medida</b><div>La que aparece al contar el cajón y al fundir las limallas. Se compara con el 10 %: lo que midas por debajo de eso es margen tuyo.</div></div>
         <div class="glos"><b>Merma declarada</b><div>La pérdida grande y sabida, que sí se anota con su causa. No es la del día a día.</div></div>
@@ -302,6 +349,7 @@ button.plain{background:none;border:1px solid var(--line);color:var(--ink)}
     <button class="tab" data-v="movimientos"><span class="ico">≡</span>Movimientos</button>
     <button class="tab" data-v="kardex"><span class="ico">◍</span>Kardex</button>
     <button class="tab" data-v="piezas"><span class="ico">◇</span>Piezas</button>
+    <button class="tab" data-v="clases"><span class="ico">◎</span>Clases</button>
     <button class="tab" data-v="guia"><span class="ico">?</span>Guía</button>
   </div>
 </div>
@@ -379,7 +427,7 @@ function mermaDeMaterial(cod){return mermaDe(D.materiales.find(x=>x.codigo===cod
 function costoDirectoDe(cod){return D.records.filter(r=>r.type==="expense"&&r.destino&&r.destino.tipo==="pieza"&&r.destino.codigo===cod).reduce((a,r)=>a+(Number(r.amount)||0),0);}
 function gramosDe(cod){return D.material.filter(m=>m.tipo==="salida"&&m.destino&&m.destino.tipo==="pieza"&&m.destino.codigo===cod).reduce((a,m)=>a+(Number(m.gramos)||0),0);}
 function valorMetalDe(cod){return D.material.filter(m=>m.tipo==="salida"&&m.destino&&m.destino.tipo==="pieza"&&m.destino.codigo===cod).reduce((a,m)=>a+(Number(m.gramos)||0)*(Number(m.precioRef)||0)*(1+mermaDeMaterial(m.material)),0);}
-function horasDe(cod){return D.horas.filter(h=>h.destino&&h.destino.codigo===cod).reduce((a,h)=>a+(Number(h.horas)||0),0);}
+function horasDe(cod){return D.horas.filter(h=>h.destino&&h.destino.tipo!=="clase"&&h.destino.codigo===cod).reduce((a,h)=>a+(Number(h.horas)||0),0);}
 function costoDe(cod){return costoDirectoDe(cod)+valorMetalDe(cod);}
 function vendida(p){return !!(p.venta&&p.venta.recordId);}
 function ingresoDe(p){return D.records.find(r=>r.id===(p.venta&&p.venta.recordId));}
@@ -413,7 +461,7 @@ function init(){
     mirar("materiales","materiales");
     mirar("proveedores","proveedores");
     mirar("personas","personas");
-    mirar("clases","clases");
+    mirar("clases","clases",(a,b)=>(b.codigo||"").localeCompare(a.codigo||""));
     dot("ok","conectado");
   }catch(e){dot("err",e.message);}
 }
@@ -442,6 +490,13 @@ function pintar(){
   fill("h_pieza",pz,o=>o.codigo,o=>o.codigo+" · "+(o.nombre||""));
   fill("m_pieza",[{codigo:"",nombre:"—"}].concat(pz),o=>o.codigo,o=>o.codigo?o.codigo+" · "+(o.nombre||""):"—");
   fill("s_clase",D.clases,o=>o.codigo,o=>o.codigo+" · "+(o.nombre||""));
+  fill("s_alumno",[{nombre:""}].concat(D.personas),o=>o.nombre||o.id||"",o=>o.nombre||o.id||"—");
+  fill("co_clase",D.clases,o=>o.codigo,o=>o.codigo+" · "+(o.nombre||""));
+  fill("co_alumno",D.personas,o=>o.nombre||o.id,o=>o.nombre||o.id);
+  fill("co_metodo",METODOS);
+  if(!$("co_valor").value)valorDeClase();
+  $("cl_codigo").value=proximoCodigoClase();
+  pintarResCobro();
   fill("h_clase",D.clases,o=>o.codigo,o=>o.codigo+" · "+(o.nombre||""));
   fill("p_existente",[{codigo:"",nombre:""}].concat(D.piezas),o=>o.codigo,o=>o.codigo?o.codigo+" · "+(o.nombre||""):"— nueva pieza —");
   if(!$("p_existente").value)$("p_codigo").value=proximoCodigo($("p_linea").value);
@@ -471,6 +526,15 @@ function pintar(){
   const hh=D.horas.slice().sort((a,b)=>(b.fecha||"").localeCompare(a.fecha||""));
   $("lhoras").innerHTML=hh.length?hh.slice(0,80).map(h=>`<div class="item ed" data-ed="horas:${esc(h.id)}"><div class="row"><div><div class="t">${esc(h.persona||"—")}</div><div class="m">${fecha(h.fecha)} · ${esc(h.linea||"")}${h.destino&&h.destino.codigo?" · "+esc(h.destino.codigo):""}${h.notas?" · "+esc(h.notas):""}</div></div><div class="r">${(Number(h.horas)||0).toLocaleString("es-CO")} h</div></div></div>`).join(""):'<div class="empty">Todavía no hay horas.</div>';
 
+  /* clases */
+  $("lclases").innerHTML=D.clases.length?D.clases.map(c=>{const x=resumenClase(c.codigo);
+    return `<div class="item ed" data-ed="clase:${esc(c.codigo)}"><div class="row"><div><div class="t">${esc(c.codigo)} · ${esc(c.nombre||"")}</div>
+      <div class="m"><span class="tag">${esc(c.tipo||"sesión")}</span> ${c.fecha?fecha(c.fecha):""}${c.valor?" · "+money(c.valor)+" por alumno":""}</div>
+      <div class="m">${x.alumnos} ${x.alumnos===1?"alumno":"alumnos"} · cobrado ${money(x.cobrado)}${x.g?" · material "+gramos(x.g)+" ("+money(x.mat)+")":""}${x.horas?" · "+x.horas.toLocaleString("es-CO")+" h":""}</div></div>
+      <div class="r">${money(x.resultado)}</div></div></div>`}).join(""):'<div class="empty">Todavía no hay clases.</div>';
+  const cb=D.records.filter(esCobro).sort((a,b)=>(b.date||"").localeCompare(a.date||""));
+  $("lcobros").innerHTML=cb.length?cb.slice(0,80).map(r=>`<div class="item ed" data-ed="cobro:${esc(r.id)}"><div class="row"><div><div class="t">${esc(r.alumno||"—")}</div><div class="m">${fecha(r.date)} · ${esc(r.destino.codigo)} · clase ${money(r.valorClase)} · material ${money(r.valorMaterial)}</div></div><div class="r">${money(r.amount)}</div></div></div>`).join(""):'<div class="empty">Todavía no hay cobros.</div>';
+
   /* piezas */
   $("piezas").innerHTML=D.piezas.length?D.piezas.map(p=>{const v=vendida(p);const ing=ingresoDe(p);const costo=(p.cierre&&p.cierre.costo)?p.cierre.costo:costoDe(p.codigo);
     const est=v?"vendida":(p.estado||"en proceso");
@@ -483,13 +547,13 @@ function pintar(){
 }
 document.querySelectorAll(".tab[data-v]").forEach(b=>b.onclick=()=>{
   document.querySelectorAll(".tab[data-v]").forEach(x=>x.classList.toggle("on",x===b));
-  ["capturar","movimientos","kardex","piezas","guia"].forEach(v=>$("v-"+v).hidden=(v!==b.dataset.v));
+  ["capturar","movimientos","kardex","piezas","clases","guia"].forEach(v=>$("v-"+v).hidden=(v!==b.dataset.v));
   window.scrollTo(0,0);
 });
 const PRIMER_FORM="compra";
 function abrirFormulario(cual){
   document.querySelectorAll("[data-f]").forEach(x=>x.classList.toggle("on",x.dataset.f===cual));
-  ["compra","salida","horas","pieza","merma","gasto","conteo"].forEach(f=>$("f-"+f).hidden=(f!==cual));
+  ["compra","salida","horas","pieza","merma","gasto","conteo","clase","cobro"].forEach(f=>$("f-"+f).hidden=(f!==cual));
   formAbierto=cual;
 }
 abrirFormulario(PRIMER_FORM);
@@ -597,7 +661,7 @@ $("s_guardar").onclick=async()=>{
   if(g>saldo(mat)&&!confirm(`Solo hay ${gramos(saldo(mat))} de ese material en el cajón. ¿Guardar de todos modos?`))return;
   const cp=costoPromedio(mat,fechaV);$("s_guardar").disabled=true;
   try{await addDoc(collection(db,"taller_material"),{tipo:"salida",material:mat,gramos:g,fecha:fechaV,precioRef:cp,
-      destino:{tipo:esClase?"clase":"pieza",codigo:cod},notas:$("s_notas").value,updatedAt:new Date().toISOString()});
+      destino:{tipo:esClase?"clase":"pieza",codigo:cod},alumno:esClase?$("s_alumno").value:"",notas:$("s_notas").value,updatedAt:new Date().toISOString()});
     $("s_gramos").value="";$("s_notas").value="";$("s_res").innerHTML="–";toast("✓ Salida guardada");
   }catch(e){toast("⚠ "+e.message);}
   $("s_guardar").disabled=false;
@@ -713,10 +777,10 @@ $("k_guardar").onclick=async()=>{
 /* ---------- añadir a los catálogos ---------- */
 document.querySelectorAll("[data-add]").forEach(b=>b.onclick=async()=>{
   const col=b.dataset.add;
-  const nombre=prompt(col==="clases"?"Código y nombre de la clase, así: J2-26-003 Platería básica":"Nombre para añadir a la lista");
+  const nombre=prompt(col==="clases"?"Nombre de la clase (el código se pone solo). Para el valor y el tipo, usa el formulario Clase.":"Nombre para añadir a la lista");
   if(!nombre)return;
   try{
-    if(col==="clases"){const [cod,...resto]=nombre.trim().split(" ");await setDoc(doc(db,"taller_clases",cod),{codigo:cod,nombre:resto.join(" ")||cod});}
+    if(col==="clases"){const cod=proximoCodigoClase();await setDoc(doc(db,"taller_clases",cod),{codigo:cod,nombre:nombre.trim(),tipo:"sesión",fecha:hoy(),creado:ahora()});toast("✓ Clase creada: "+cod);return;}
     else if(col==="materiales"){const cod=nombre.trim().toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
       await setDoc(doc(db,"taller_materiales",cod),{codigo:cod,nombre:nombre.trim(),metalBase:"otro",pureza:1});}
     else{const cod=nombre.trim().toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
@@ -767,6 +831,7 @@ function avisoCierre(...codigos){const c=[...new Set(codigos.filter(Boolean))].f
 
 function editarRegistro(id){
   const r=D.records.find(x=>x.id===id);if(!r){toast("Ese registro ya no existe");return;}
+  if(esCobro(r))return editarCobro(id);
   const mov=D.material.find(m=>m.recordId===id&&m.tipo==="entrada");
   if(mov)editarCompra(r,mov);else editarGasto(r);
 }
@@ -841,7 +906,8 @@ function editarMov(id){
   const dest=m.destino||{};
   const campos=[{k:"fecha",l:"Fecha",t:"date",v:m.fecha}];
   if(esSalida){campos.push({k:"dtipo",l:"Destino",t:"select",o:[["pieza","Una pieza"],["clase","Una clase (lo compran los alumnos)"]],v:dest.tipo||"pieza"});
-    campos.push({k:"dcod",l:"¿Cuál?",t:"select",o:[],v:""});}
+    campos.push({k:"dcod",l:"¿Cuál?",t:"select",o:[],v:""});
+    campos.push({k:"alumno",l:"Alumno (si es de una clase)",t:"select",o:oNombres(D.personas),v:m.alumno||""});}
   campos.push({k:"material",l:"Material",t:"select",o:oMateriales(),v:m.material});
   campos.push({k:"gramos",l:"Gramos",t:"num",v:m.gramos,h:"Los decimales van con coma: 0,125."});
   if(esMerma){campos.push({k:"causa",l:"Causa",t:"select",o:CAUSAS.map(x=>[x,x]),v:m.causa});
@@ -858,7 +924,7 @@ function editarMov(id){
       const f=ev("fecha"),mat=ev("material"),g=num(ev("gramos"));
       if(!f||!mat||g<=0){toast("Faltan fecha, material o gramos");return;}
       const cambios={fecha:f,material:mat,gramos:g,notas:ev("notas"),updatedAt:ahora()};
-      if(esSalida){const cod=ev("dcod"),tipo=ev("dtipo")==="clase"?"clase":"pieza";if(!cod){toast("Falta el destino");return;}cambios.destino={tipo,codigo:cod};
+      if(esSalida){const cod=ev("dcod"),tipo=ev("dtipo")==="clase"?"clase":"pieza";if(!cod){toast("Falta el destino");return;}cambios.destino={tipo,codigo:cod};cambios.alumno=tipo==="clase"?ev("alumno"):"";
         const disp=saldo(mat)+(mat===m.material?(Number(m.gramos)||0):0);
         if(g>disp&&!confirm(`Solo hay ${gramos(disp)} de ese material en el cajón. ¿Guardar de todos modos?`))return;}
       if(esMerma){if(!ev("causa")){toast("La merma exige causa");return;}cambios.causa=ev("causa");const cod=ev("pieza");cambios.destino=cod?{tipo:"pieza",codigo:cod}:null;}
@@ -925,11 +991,114 @@ function editarPieza(cod){
 document.addEventListener("click",e=>{
   const it=e.target.closest("[data-ed]");if(!it)return;
   const i=it.dataset.ed.indexOf(":"),kind=it.dataset.ed.slice(0,i),id=it.dataset.ed.slice(i+1);
-  ({registro:editarRegistro,mov:editarMov,conteo:editarConteo,horas:editarHoras,pieza:editarPieza})[kind](id);
+  ({registro:editarRegistro,mov:editarMov,conteo:editarConteo,horas:editarHoras,pieza:editarPieza,clase:editarClase,cobro:editarCobro})[kind](id);
 });
 
+/* ---------- clases y sus cobros ---------- */
+// El cobro de una clase es un ingreso del libro general con línea J2 y destino la clase: se anota aquí y no en el financiero.
+const FUENTE_CLASE="Clase · Joyería";
+const pesos=n=>(Number(n)||0)?(Number(n)||0).toLocaleString("es-CO",{maximumFractionDigits:0}):"";
+const esCobro=r=>r.type==="income"&&r.destino&&r.destino.tipo==="clase";
+function proximoCodigoClase(){const pre="J2-"+String(new Date().getFullYear()).slice(2)+"-";
+  const usados=D.clases.map(c=>c.codigo||"").filter(c=>c.startsWith(pre)).map(c=>Number(c.slice(pre.length))||0);
+  return pre+String((usados.length?Math.max(...usados):0)+1).padStart(3,"0");}
+function salidasClase(cod,alumno){return D.material.filter(m=>m.tipo==="salida"&&m.destino&&m.destino.tipo==="clase"&&m.destino.codigo===cod&&(!alumno||m.alumno===alumno));}
+const valorSalidas=ss=>ss.reduce((a,m)=>a+(Number(m.gramos)||0)*(Number(m.precioRef)||0),0);
+const gramosSalidas=ss=>ss.reduce((a,m)=>a+(Number(m.gramos)||0),0);
+function resumenClase(cod){
+  const cobros=D.records.filter(r=>esCobro(r)&&r.destino.codigo===cod),ss=salidasClase(cod);
+  const cobClase=cobros.reduce((a,r)=>a+(Number(r.valorClase)||0),0),cobMat=cobros.reduce((a,r)=>a+(Number(r.valorMaterial)||0),0);
+  const gastos=D.records.filter(r=>r.type==="expense"&&r.destino&&r.destino.tipo==="clase"&&r.destino.codigo===cod).reduce((a,r)=>a+(Number(r.amount)||0),0);
+  const horas=D.horas.filter(h=>h.destino&&h.destino.tipo==="clase"&&h.destino.codigo===cod).reduce((a,h)=>a+(Number(h.horas)||0),0);
+  const mat=valorSalidas(ss),g=gramosSalidas(ss);
+  return {cobros,cobClase,cobMat,cobrado:cobClase+cobMat,gastos,horas,mat,g,salidas:ss,
+    alumnos:new Set(cobros.map(r=>r.alumno).filter(Boolean)).size,resultado:cobClase+cobMat-mat-gastos};
+}
+function registroCobro(f,cod,al,vc,vm,met,notas){const c=D.clases.find(x=>x.codigo===cod)||{};
+  return {type:"income",date:f,quantity:1,unitAmount:vc+vm,amount:vc+vm,source:FUENTE_CLASE,method:met||"Efectivo",person:"",status:"Pagado",ambito:"Suma",
+    category:"",supplier:"",description:`${cod}${c.nombre?" "+c.nombre:""} · ${al}${notas?" · "+notas:""}`,
+    linea:"J2",unidad:"unidad",destino:{tipo:"clase",codigo:cod},alumno:al,valorClase:vc,valorMaterial:vm,notas:notas||"",updatedAt:ahora()};}
+function textoMaterialAlumno(cod,al){if(!cod||!al)return "";const ss=salidasClase(cod,al);
+  return ss.length?` ${esc(al)} usó <b>${gramos(gramosSalidas(ss))}</b> en esta clase, que al costo del cajón valen <b>${money(valorSalidas(ss))}</b>.`
+    :` No hay salidas de material a esta clase a nombre de ${esc(al)}.`;}
+function valorDeClase(){const c=D.clases.find(x=>x.codigo===$("co_clase").value);$("co_valor").value=c&&c.valor?pesos(c.valor):"";}
+function pintarResCobro(){const vc=num($("co_valor").value),vm=num($("co_material").value);
+  $("co_res").innerHTML=`Total del cobro: <b>${money(vc+vm)}</b>.`+textoMaterialAlumno($("co_clase").value,$("co_alumno").value);}
+$("co_clase").onchange=()=>{valorDeClase();pintarResCobro();};
+$("co_alumno").onchange=$("co_valor").oninput=$("co_material").oninput=pintarResCobro;
+$("co_guardar").onclick=async()=>{
+  const f=$("co_fecha").value,cod=$("co_clase").value,al=$("co_alumno").value,vc=num($("co_valor").value),vm=num($("co_material").value);
+  if(!f||!cod||!al){toast("Faltan fecha, clase o alumno");return;}
+  if(vc+vm<=0){toast("Escribe el valor de la clase o del material");return;}
+  $("co_guardar").disabled=true;
+  try{const rec=registroCobro(f,cod,al,vc,vm,$("co_metodo").value,$("co_notas").value);rec.tags="";rec.attachments=[];
+    await addDoc(collection(db,"records"),rec);
+    $("co_material").value="";$("co_notas").value="";valorDeClase();pintarResCobro();toast("✓ Cobro guardado: "+money(vc+vm));
+  }catch(e){toast("⚠ "+e.message);}
+  $("co_guardar").disabled=false;
+};
+$("cl_tipo").onchange=()=>{const curso=$("cl_tipo").value==="curso";$("cl_ses_wrap").hidden=!curso;$("cl_fecha_l").textContent=curso?"Empieza":"Fecha";};
+$("cl_guardar").onclick=async()=>{
+  const nombre=$("cl_nombre").value.trim(),f=$("cl_fecha").value,tipo=$("cl_tipo").value,valor=num($("cl_valor").value);
+  if(!nombre||!f){toast("Faltan nombre o fecha");return;}
+  const cod=proximoCodigoClase();
+  if(D.clases.some(c=>c.codigo===cod)){toast("Ese código ya existe: recarga la página");return;}
+  $("cl_guardar").disabled=true;
+  try{await setDoc(doc(db,"taller_clases",cod),{codigo:cod,nombre,tipo,fecha:f,sesiones:tipo==="curso"?(num($("cl_sesiones").value)||null):null,
+      valor,notas:$("cl_notas").value,creado:ahora()});
+    ["cl_nombre","cl_valor","cl_notas","cl_sesiones"].forEach(id=>$(id).value="");toast("✓ Clase creada: "+cod);
+  }catch(e){toast("⚠ "+e.message);}
+  $("cl_guardar").disabled=false;
+};
+function editarClase(cod){
+  const c=D.clases.find(x=>x.codigo===cod);if(!c){toast("Esa clase ya no existe");return;}
+  const x=resumenClase(cod);
+  const filas=x.cobros.slice().sort((a,b)=>(a.date||"").localeCompare(b.date||"")).map(r=>`<div class="item ed" data-ed="cobro:${esc(r.id)}"><div class="row"><div><div class="t">${esc(r.alumno||"—")}</div><div class="m">${fecha(r.date)} · clase ${money(r.valorClase)} · material ${money(r.valorMaterial)}</div></div><div class="r">${money(r.amount)}</div></div></div>`).join("");
+  const sal=x.salidas.map(m=>{const mat=D.materiales.find(y=>y.codigo===m.material)||{nombre:m.material};
+    return `<div class="m">${fecha(m.fecha)} · ${esc(mat.nombre||m.material)} · ${gramos(m.gramos)} · ${money((Number(m.gramos)||0)*(Number(m.precioRef)||0))}${m.alumno?" · "+esc(m.alumno):""}</div>`;}).join("");
+  const nota=`<b>${esc(cod)}</b><br>Cobrado: clase <b>${money(x.cobClase)}</b> + material <b>${money(x.cobMat)}</b> = <b>${money(x.cobrado)}</b><br>
+    Material que salió del cajón: ${gramos(x.g)}, ${money(x.mat)} al costo · gastos de la clase ${money(x.gastos)} · ${x.horas.toLocaleString("es-CO")} h<br>
+    Resultado: <b>${money(x.resultado)}</b> <span class="hint" style="display:inline">(lo cobrado menos material y gastos; las horas no se restan porque aún no tienen tarifa)</span>
+    ${sal?`<div style="margin-top:8px"><b>Salidas de material</b>${sal}</div>`:""}
+    <div style="margin-top:8px"><b>Cobros</b> <span class="hint" style="display:inline">· toca uno para corregirlo</span>${filas||'<div class="empty">Sin cobros todavía.</div>'}</div>`;
+  abrirHoja("Clase · "+(c.nombre||cod),[
+    {k:"nombre",l:"Nombre",t:"text",v:c.nombre},
+    {k:"tipo",l:"Tipo",t:"select",o:[["sesión","Sesión (un día)"],["curso","Curso (varias sesiones)"]],v:c.tipo||"sesión"},
+    {k:"fecha",l:c.tipo==="curso"?"Empieza":"Fecha",t:"date",v:c.fecha},
+    {k:"sesiones",l:"Sesiones (si es curso)",t:"num",v:c.sesiones},
+    {k:"valor",l:"Valor de la clase por alumno",t:"num",v:c.valor,h:"Cambiarlo no toca los cobros ya hechos."},
+    {k:"notas",l:"Notas",t:"text",v:c.notas}
+  ],{nota,
+    guardar:async()=>{if(!ev("nombre").trim()){toast("Falta el nombre");return;}const tipo=ev("tipo");
+      await updateDoc(doc(db,"taller_clases",cod),{nombre:ev("nombre").trim(),tipo,fecha:ev("fecha"),sesiones:tipo==="curso"?(num(ev("sesiones"))||null):null,
+        valor:num(ev("valor")),notas:ev("notas"),updatedAt:ahora()});return "✓ Clase corregida";},
+    borrar:async()=>{
+      const usos=x.cobros.length+x.salidas.length+D.horas.filter(h=>h.destino&&h.destino.tipo==="clase"&&h.destino.codigo===cod).length
+        +D.records.filter(r=>r.type==="expense"&&r.destino&&r.destino.tipo==="clase"&&r.destino.codigo===cod).length;
+      if(usos){toast("Esta clase tiene cobros, salidas, horas o gastos: bórralos primero");return;}
+      if(!confirm(`¿Borrar la clase ${cod}?`))return;await deleteDoc(doc(db,"taller_clases",cod));return "✓ Clase borrada";}});
+}
+function editarCobro(id){
+  const r=D.records.find(x=>x.id===id);if(!r){toast("Ese cobro ya no existe");return;}
+  abrirHoja("Corregir cobro de clase",[
+    {k:"fecha",l:"Fecha",t:"date",v:r.date},
+    {k:"clase",l:"Clase",t:"select",o:oClases(),v:r.destino.codigo},
+    {k:"alumno",l:"Alumno",t:"select",o:oNombres(D.personas).slice(1),v:r.alumno},
+    {k:"valor",l:"Valor de la clase",t:"num",v:r.valorClase},
+    {k:"material",l:"Material",t:"num",v:r.valorMaterial},
+    {k:"metodo",l:"Método",t:"select",o:METODOS.map(m=>[m,m]),v:r.method},
+    {k:"notas",l:"Notas",t:"text",v:r.notas}
+  ],{nota:"Es un ingreso del libro general. Se corrige aquí, no en el financiero.",
+    guardar:async()=>{const f=ev("fecha"),cod=ev("clase"),al=ev("alumno"),vc=num(ev("valor")),vm=num(ev("material"));
+      if(!f||!cod||!al){toast("Faltan fecha, clase o alumno");return;}
+      if(vc+vm<=0){toast("Escribe el valor de la clase o del material");return;}
+      await updateDoc(doc(db,"records",id),registroCobro(f,cod,al,vc,vm,ev("metodo"),ev("notas")));return "✓ Cobro corregido";},
+    borrar:async()=>{if(!confirm(`¿Borrar el cobro de ${money(r.amount)} a ${r.alumno||"—"}?`))return;
+      await deleteDoc(doc(db,"records",id));return "✓ Cobro borrado";}});
+}
+
 /* ---------- fechas por defecto ---------- */
-["c_fecha","s_fecha","h_fecha","m_fecha","g_fecha","k_fecha"].forEach(id=>$(id).value=hoy());
+["c_fecha","s_fecha","h_fecha","m_fecha","g_fecha","k_fecha","cl_fecha","co_fecha"].forEach(id=>$(id).value=hoy());
 $("p_codigo").value=proximoCodigo("J1");
 document.documentElement.dataset.taller='listo';
 </script>
