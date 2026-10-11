@@ -97,50 +97,47 @@ button.plain{background:none;border:1px solid var(--line);color:var(--ink)}
     <section id="v-capturar">
       <div class="gl">
         <button class="bt" data-f="compra">＋ Compra de material</button>
-        <button class="bt" data-f="salida">→ Salida</button>
+        <button class="bt" data-f="salida">→ Salida a pieza</button>
         <button class="bt" data-f="horas">◷ Horas</button>
         <button class="bt" data-f="pieza">◇ Pieza</button>
         <button class="bt" data-f="merma">✕ Merma</button>
         <button class="bt" data-f="gasto">$ Otro gasto</button>
         <button class="bt" data-f="conteo">⚖ Conteo</button>
         <button class="bt" data-f="clase">◎ Clase</button>
-        <button class="bt" data-f="cobro">＄ Cobro de clase</button>
       </div>
 
       <div class="card form" id="f-clase" hidden>
-        <h2>Nueva clase</h2>
-        <div class="row2">
-          <div class="field"><label>Código</label><input type="text" id="cl_codigo" readonly title="Consecutivo automático: J2, año y número"></div>
-          <div class="field"><label>Tipo</label><select id="cl_tipo"><option value="sesión">Sesión (un día)</option><option value="curso">Curso (varias sesiones)</option></select></div>
+        <h2>Clase</h2>
+        <div class="hint" style="margin-bottom:10px">Todo en un paso: la clase, el material que usó el alumno y lo que le cobras. El cobro entra al libro general como «Clase · Joyería»; no lo anotes también en el financiero.</div>
+        <div class="field"><label>Fecha</label><input type="date" id="cl_fecha"></div>
+        <div class="field"><label>Clase</label><select id="cl_clase"></select></div>
+        <div id="cl_nueva">
+          <div class="row2">
+            <div class="field"><label>Código</label><input type="text" id="cl_codigo" readonly title="Consecutivo automático: J2, año y número"></div>
+            <div class="field"><label>Tipo</label><select id="cl_tipo"><option value="sesión">Sesión (un día)</option><option value="curso">Curso (varias sesiones)</option></select></div>
+          </div>
+          <div class="field"><label>Nombre de la clase</label><input type="text" id="cl_nombre" placeholder="platería básica, anillo de plata…"></div>
+          <div class="row2">
+            <div class="field"><label>Valor por alumno</label><input type="text" inputmode="decimal" id="cl_valorbase" placeholder="280.000"></div>
+            <div class="field" id="cl_ses_wrap" hidden><label>Sesiones</label><input type="text" inputmode="numeric" id="cl_sesiones" placeholder="4"></div>
+          </div>
         </div>
-        <div class="field"><label>Nombre</label><input type="text" id="cl_nombre" placeholder="platería básica, anillo de plata…"></div>
-        <div class="row2">
-          <div class="field"><label id="cl_fecha_l">Fecha</label><input type="date" id="cl_fecha"></div>
-          <div class="field" id="cl_ses_wrap" hidden><label>Sesiones</label><input type="text" inputmode="numeric" id="cl_sesiones" placeholder="4"></div>
-        </div>
-        <div class="field"><label>Valor de la clase por alumno</label><input type="text" inputmode="decimal" id="cl_valor" placeholder="280.000">
-          <div class="hint">Es fijo. El material se cobra aparte, según lo que use cada alumno.</div></div>
-        <div class="field"><label>Notas</label><input type="text" id="cl_notas"></div>
-        <button class="primary" id="cl_guardar">Guardar clase</button>
-        <div class="hint" style="margin-top:8px">Para ver o corregir una clase, tócala en la pestaña <b>Clases</b>.</div>
-      </div>
-
-      <div class="card form" id="f-cobro" hidden>
-        <h2>Cobro de clase</h2>
-        <div class="hint" style="margin-bottom:10px">Entra al libro general como ingreso de «Clase · Joyería». No lo anotes también en el financiero.</div>
-        <div class="field"><label>Fecha</label><input type="date" id="co_fecha"></div>
-        <div class="field"><label>Clase</label><select id="co_clase"></select>
-          <div class="hint">Si la clase no está, créala primero en <b>Clase</b>.</div></div>
-        <div class="field"><label>Alumno</label><select id="co_alumno"></select>
+        <div class="field"><label>Alumno</label><select id="cl_alumno"></select>
           <button class="ghost" data-add="personas" type="button">Añadir alumno</button></div>
         <div class="row2">
-          <div class="field"><label>Valor de la clase</label><input type="text" inputmode="decimal" id="co_valor" placeholder="0"></div>
-          <div class="field"><label>Material</label><input type="text" inputmode="decimal" id="co_material" placeholder="0"></div>
+          <div class="field"><label>Material que usó</label><select id="cl_material"></select></div>
+          <div class="field"><label>Gramos</label><input type="text" inputmode="decimal" id="cl_gramos" placeholder="0"></div>
         </div>
-        <div class="res" id="co_res">–</div>
-        <div class="field"><label>Método</label><select id="co_metodo"></select></div>
-        <div class="field"><label>Notas</label><input type="text" id="co_notas"></div>
-        <button class="primary" id="co_guardar">Guardar cobro</button>
+        <div class="hint">Los decimales van con coma: 0,125. Los gramos salen del cajón al guardar.</div>
+        <div class="row2">
+          <div class="field"><label>Valor de la clase</label><input type="text" inputmode="decimal" id="cl_valor" placeholder="0"></div>
+          <div class="field"><label>Cobro del material</label><input type="text" inputmode="decimal" id="cl_cobromat" placeholder="0"></div>
+        </div>
+        <div class="res" id="cl_res">–</div>
+        <div class="field"><label>Método</label><select id="cl_metodo"></select></div>
+        <div class="field"><label>Notas</label><input type="text" id="cl_notas"></div>
+        <button class="primary" id="cl_guardar">Guardar</button>
+        <div class="hint" style="margin-top:8px">Para ver o corregir una clase, tócala en la pestaña <b>Clases</b>.</div>
       </div>
 
       <div class="card form" id="f-compra" hidden>
@@ -163,17 +160,12 @@ button.plain{background:none;border:1px solid var(--line);color:var(--ink)}
       </div>
 
       <div class="card form" id="f-salida" hidden>
-        <h2>Salida de material</h2>
+        <h2>Salida de material a una pieza</h2>
         <div class="field"><label>Fecha</label><input type="date" id="s_fecha"></div>
-        <div class="field"><label>Destino</label>
-          <select id="s_destino_tipo"><option value="pieza">Una pieza</option><option value="clase">Una clase (lo compran los alumnos)</option></select></div>
+        <select id="s_destino_tipo" hidden><option value="pieza">Una pieza</option></select>
         <div class="field" id="s_pieza_wrap"><label>Pieza</label><select id="s_pieza"></select>
-          <div class="hint">Si la pieza no está, créala primero en <b>Pieza</b>.</div></div>
-        <div class="field" id="s_clase_wrap" hidden><label>Clase</label><select id="s_clase"></select>
-          <button class="ghost" data-add="clases" type="button">Añadir clase</button>
-          <label style="margin-top:8px">Alumno que usó este material</label><select id="s_alumno"></select>
-          <button class="ghost" data-add="personas" type="button">Añadir alumno</button>
-          <div class="hint">Elegir el alumno sirve para saber cuánto cobrarle de material. Si el material se repartió entre varios, déjalo en «—». Lo que pagan se anota en <b>Cobro de clase</b>.</div></div>
+          <div class="hint">Si la pieza no está, créala primero en <b>Pieza</b>. El material de una clase se anota en <b>Clase</b>.</div></div>
+        <div id="s_clase_wrap" hidden><select id="s_clase"></select><select id="s_alumno"></select></div>
         <div class="field"><label>Material</label><select id="s_material"></select></div>
         <div class="field"><label>Gramos</label><input type="text" inputmode="decimal" id="s_gramos" placeholder="0"></div>
         <div class="hint">Los decimales van con coma: 0,125. Si escribes con punto, el punto separa miles.</div>
@@ -318,7 +310,7 @@ button.plain{background:none;border:1px solid var(--line);color:var(--ink)}
         <h2>Las palabras</h2>
         <div class="glos"><b>Destino</b><div>A qué se carga: a una pieza, al material del cajón o a una clase. Es lo que convierte un gasto en costo.</div></div>
         <div class="glos"><b>Clase</b><div>Una sesión o un curso, con código J2. Lleva un valor fijo por alumno; el material se cobra aparte, según lo que use cada uno.</div></div>
-        <div class="glos"><b>Cobro de clase</b><div>Lo que paga un alumno: el valor de la clase más su material. Entra al libro general como ingreso de «Clase · Joyería» y no se anota también en el financiero.</div></div>
+        <div class="glos"><b>Cobro de clase</b><div>Lo que paga un alumno: el valor de la clase más su material. Se anota en <b>Clase</b>, en el mismo paso que el material que usó. Entra al libro general como ingreso de «Clase · Joyería» y no se anota también en el financiero.</div></div>
         <div class="glos"><b>Merma provisionada</b><div>El 10 % que se le carga al metal de cada pieza. Cubre que una pieza haya que fundirla dos veces, que el material venga agrio o que se vaya mucha lima. Es previsión del proceso, no una retención.</div></div>
         <div class="glos"><b>Merma medida</b><div>La que aparece al contar el cajón y al fundir las limallas. Se compara con el 10 %: lo que midas por debajo de eso es margen tuyo.</div></div>
         <div class="glos"><b>Merma declarada</b><div>La pérdida grande y sabida, que sí se anota con su causa. No es la del día a día.</div></div>
@@ -492,12 +484,12 @@ function pintar(){
   fill("m_pieza",[{codigo:"",nombre:"—"}].concat(pz),o=>o.codigo,o=>o.codigo?o.codigo+" · "+(o.nombre||""):"—");
   fill("s_clase",D.clases,o=>o.codigo,o=>o.codigo+" · "+(o.nombre||""));
   fill("s_alumno",[{nombre:""}].concat(D.personas),o=>o.nombre||o.id||"",o=>o.nombre||o.id||"—");
-  fill("co_clase",D.clases,o=>o.codigo,o=>o.codigo+" · "+(o.nombre||""));
-  fill("co_alumno",D.personas,o=>o.nombre||o.id,o=>o.nombre||o.id);
-  fill("co_metodo",METODOS);
-  if(!$("co_valor").value)valorDeClase();
-  $("cl_codigo").value=proximoCodigoClase();
-  pintarResCobro();
+  fill("cl_clase",[{codigo:"",nombre:""}].concat(D.clases),o=>o.codigo,o=>o.codigo?o.codigo+" · "+(o.nombre||""):"— nueva clase —");
+  if(claseRecien&&D.clases.some(c=>c.codigo===claseRecien)){$("cl_clase").value=claseRecien;claseRecien=null;}
+  fill("cl_alumno",[{nombre:""}].concat(D.personas),o=>o.nombre||o.id||"",o=>o.nombre||o.id||"— elige —");
+  fill("cl_material",[{codigo:"",nombre:""}].concat(D.materiales),o=>o.codigo,o=>o.codigo?o.nombre:"— sin material —");
+  fill("cl_metodo",METODOS);
+  pintarClase();
   fill("h_clase",D.clases,o=>o.codigo,o=>o.codigo+" · "+(o.nombre||""));
   fill("p_existente",[{codigo:"",nombre:""}].concat(D.piezas),o=>o.codigo,o=>o.codigo?o.codigo+" · "+(o.nombre||""):"— nueva pieza —");
   if(!$("p_existente").value)$("p_codigo").value=proximoCodigo($("p_linea").value);
@@ -554,7 +546,7 @@ document.querySelectorAll(".tab[data-v]").forEach(b=>b.onclick=()=>{
 const PRIMER_FORM="compra";
 function abrirFormulario(cual){
   document.querySelectorAll("[data-f]").forEach(x=>x.classList.toggle("on",x.dataset.f===cual));
-  ["compra","salida","horas","pieza","merma","gasto","conteo","clase","cobro"].forEach(f=>$("f-"+f).hidden=(f!==cual));
+  ["compra","salida","horas","pieza","merma","gasto","conteo","clase"].forEach(f=>$("f-"+f).hidden=(f!==cual));
   formAbierto=cual;
 }
 abrirFormulario(PRIMER_FORM);
@@ -1022,34 +1014,64 @@ function registroCobro(f,cod,al,vc,vm,met,notas){const c=D.clases.find(x=>x.codi
 function textoMaterialAlumno(cod,al){if(!cod||!al)return "";const ss=salidasClase(cod,al);
   return ss.length?` ${esc(al)} usó <b>${gramos(gramosSalidas(ss))}</b> en esta clase, que al costo del cajón valen <b>${money(valorSalidas(ss))}</b>.`
     :` No hay salidas de material a esta clase a nombre de ${esc(al)}.`;}
-function valorDeClase(){const c=D.clases.find(x=>x.codigo===$("co_clase").value);$("co_valor").value=c&&c.valor?pesos(c.valor):"";}
-function pintarResCobro(){const vc=num($("co_valor").value),vm=num($("co_material").value);
-  $("co_res").innerHTML=`Total del cobro: <b>${money(vc+vm)}</b>.`+textoMaterialAlumno($("co_clase").value,$("co_alumno").value);}
-$("co_clase").onchange=()=>{valorDeClase();pintarResCobro();};
-$("co_alumno").onchange=$("co_valor").oninput=$("co_material").oninput=pintarResCobro;
-$("co_guardar").onclick=async()=>{
-  const f=$("co_fecha").value,cod=$("co_clase").value,al=$("co_alumno").value,vc=num($("co_valor").value),vm=num($("co_material").value);
-  if(!f||!cod||!al){toast("Faltan fecha, clase o alumno");return;}
-  if(vc+vm<=0){toast("Escribe el valor de la clase o del material");return;}
-  $("co_guardar").disabled=true;
-  try{const rec=registroCobro(f,cod,al,vc,vm,$("co_metodo").value,$("co_notas").value);rec.tags="";rec.attachments=[];
-    await addDoc(collection(db,"records"),rec);
-    $("co_material").value="";$("co_notas").value="";valorDeClase();pintarResCobro();toast("✓ Cobro guardado: "+money(vc+vm));
-  }catch(e){toast("⚠ "+e.message);}
-  $("co_guardar").disabled=false;
-};
-$("cl_tipo").onchange=()=>{const curso=$("cl_tipo").value==="curso";$("cl_ses_wrap").hidden=!curso;$("cl_fecha_l").textContent=curso?"Empieza":"Fecha";};
+// Un solo formulario para la clase: crea la clase si es nueva, saca del cajón el material del alumno y escribe su cobro, en un solo lote.
+// El cobro del material se sugiere al precio de reposición del gramo; se puede cambiar, y desde ese momento no se toca solo.
+let claseRecien=null;
+const yaPagoClase=(cod,al)=>!!(cod&&al&&D.records.some(r=>esCobro(r)&&r.destino.codigo===cod&&r.alumno===al&&(Number(r.valorClase)||0)>0));
+function sugerirValor(){const cod=$("cl_clase").value,al=$("cl_alumno").value;
+  if(!cod){$("cl_valor").value=$("cl_valorbase").value;return;}
+  const c=D.clases.find(x=>x.codigo===cod)||{};$("cl_valor").value=yaPagoClase(cod,al)?"":pesos(c.valor);}
+function sugerirMaterial(){if($("cl_cobromat").dataset.manual)return;const mat=$("cl_material").value,g=num($("cl_gramos").value);
+  $("cl_cobromat").value=mat&&g>0?pesos(Math.round(g*precioRef(mat).p)):"";}
+function pintarClase(){
+  const nueva=!$("cl_clase").value;$("cl_nueva").hidden=!nueva;
+  if(nueva)$("cl_codigo").value=proximoCodigoClase();
+  $("cl_ses_wrap").hidden=$("cl_tipo").value!=="curso";
+  const cod=$("cl_clase").value,al=$("cl_alumno").value,mat=$("cl_material").value,g=num($("cl_gramos").value);
+  const vc=num($("cl_valor").value),vm=num($("cl_cobromat").value);
+  let t="";
+  if(mat&&g>0){const cp=costoPromedio(mat,$("cl_fecha").value),pr=precioRef(mat);
+    t+=`Salen <b>${gramos(g)}</b> del cajón: <b>${money(g*cp)}</b> al costo promedio (${money(cp)}/g); a reposición, ${money(g*pr.p)} (${money(pr.p)}/g). Quedan ${gramos(saldo(mat)-g)}.<br>`;
+    if(g>saldo(mat))t+=`<b>Ojo:</b> en el cajón solo hay ${gramos(saldo(mat))} de ese material.<br>`;}
+  if(yaPagoClase(cod,al))t+=`${esc(al)} ya pagó esta clase: el valor de la clase queda en cero, cóbrale solo el material.<br>`;
+  t+=`Total del cobro: <b>${money(vc+vm)}</b>.`;
+  $("cl_res").innerHTML=t;}
+$("cl_clase").onchange=$("cl_alumno").onchange=()=>{sugerirValor();pintarClase();};
+$("cl_valorbase").oninput=()=>{if(!$("cl_clase").value)$("cl_valor").value=$("cl_valorbase").value;pintarClase();};
+$("cl_material").onchange=$("cl_gramos").oninput=()=>{sugerirMaterial();pintarClase();};
+$("cl_cobromat").oninput=()=>{$("cl_cobromat").dataset.manual=$("cl_cobromat").value?"1":"";pintarClase();};
+$("cl_tipo").onchange=$("cl_valor").oninput=$("cl_fecha").onchange=pintarClase;
 $("cl_guardar").onclick=async()=>{
-  const nombre=$("cl_nombre").value.trim(),f=$("cl_fecha").value,tipo=$("cl_tipo").value,valor=num($("cl_valor").value);
-  if(!nombre||!f){toast("Faltan nombre o fecha");return;}
-  const cod=proximoCodigoClase();
-  if(D.clases.some(c=>c.codigo===cod)){toast("Ese código ya existe: recarga la página");return;}
+  const f=$("cl_fecha").value,nueva=!$("cl_clase").value,al=$("cl_alumno").value,mat=$("cl_material").value,g=num($("cl_gramos").value);
+  const vc=num($("cl_valor").value),vm=num($("cl_cobromat").value),notas=$("cl_notas").value;
+  if(!f){toast("Falta la fecha");return;}
+  if(nueva&&!$("cl_nombre").value.trim()){toast("Falta el nombre de la clase");return;}
+  if(!al){toast("Elige el alumno");return;}
+  if(g>0&&!mat){toast("Elige el material que usó");return;}
+  if(mat&&g<=0){toast("Escribe los gramos que usó, o deja el material en «sin material»");return;}
+  if(vc+vm<=0&&g<=0){toast("No hay nada que guardar: ni cobro ni material");return;}
+  if(g>saldo(mat)&&!confirm(`Solo hay ${gramos(saldo(mat))} de ese material en el cajón. ¿Guardar de todos modos?`))return;
+  const cod=nueva?proximoCodigoClase():$("cl_clase").value;
+  if(nueva&&D.clases.some(c=>c.codigo===cod)){toast("Ese código ya existe: recarga la página");return;}
   $("cl_guardar").disabled=true;
-  try{await setDoc(doc(db,"taller_clases",cod),{codigo:cod,nombre,tipo,fecha:f,sesiones:tipo==="curso"?(num($("cl_sesiones").value)||null):null,
-      valor,notas:$("cl_notas").value,creado:ahora()});
-    ["cl_nombre","cl_valor","cl_notas","cl_sesiones"].forEach(id=>$(id).value="");toast("✓ Clase creada: "+cod);
+  try{
+    const lote=writeBatch(db);
+    if(nueva){const tipo=$("cl_tipo").value;
+      lote.set(doc(db,"taller_clases",cod),{codigo:cod,nombre:$("cl_nombre").value.trim(),tipo,fecha:f,
+        sesiones:tipo==="curso"?(num($("cl_sesiones").value)||null):null,valor:num($("cl_valorbase").value),notas:"",creado:ahora()});
+      D.clases.push({codigo:cod,nombre:$("cl_nombre").value.trim()});}
+    let salidaId=null;
+    if(g>0){const ref=doc(collection(db,"taller_material"));salidaId=ref.id;
+      lote.set(ref,{tipo:"salida",material:mat,gramos:g,fecha:f,precioRef:costoPromedio(mat,f),destino:{tipo:"clase",codigo:cod},alumno:al,notas,updatedAt:ahora()});}
+    if(vc+vm>0){const rec=registroCobro(f,cod,al,vc,vm,$("cl_metodo").value,notas);rec.salidaId=salidaId;rec.tags="";rec.attachments=[];
+      lote.set(doc(collection(db,"records")),rec);}
+    await lote.commit();
+    if(nueva){claseRecien=cod;["cl_nombre","cl_valorbase","cl_sesiones"].forEach(id=>$(id).value="");}
+    ["cl_gramos","cl_cobromat","cl_notas"].forEach(id=>$(id).value="");$("cl_cobromat").dataset.manual="";
+    $("cl_alumno").value="";$("cl_material").value="";$("cl_valor").value="";
+    toast(`✓ ${cod}: `+(vc+vm>0?"cobro de "+money(vc+vm):"sin cobro")+(g>0?" · "+gramos(g)+" del cajón":""));
   }catch(e){toast("⚠ "+e.message);}
-  $("cl_guardar").disabled=false;
+  $("cl_guardar").disabled=false;pintarClase();
 };
 function editarClase(cod){
   const c=D.clases.find(x=>x.codigo===cod);if(!c){toast("Esa clase ya no existe");return;}
@@ -1079,27 +1101,38 @@ function editarClase(cod){
       if(usos){toast("Esta clase tiene cobros, salidas, horas o gastos: bórralos primero");return;}
       if(!confirm(`¿Borrar la clase ${cod}?`))return;await deleteDoc(doc(db,"taller_clases",cod));return "✓ Clase borrada";}});
 }
+// El cobro y la salida de material que se guardaron juntos se corrigen y se borran juntos.
 function editarCobro(id){
   const r=D.records.find(x=>x.id===id);if(!r){toast("Ese cobro ya no existe");return;}
+  const sal=r.salidaId?D.material.find(m=>m.id===r.salidaId):null;
   abrirHoja("Corregir cobro de clase",[
     {k:"fecha",l:"Fecha",t:"date",v:r.date},
     {k:"clase",l:"Clase",t:"select",o:oClases(),v:r.destino.codigo},
     {k:"alumno",l:"Alumno",t:"select",o:oNombres(D.personas).slice(1),v:r.alumno},
+    {k:"mat",l:"Material que usó",t:"select",o:[["","— sin material —"]].concat(oMateriales()),v:sal?sal.material:""},
+    {k:"gramos",l:"Gramos",t:"num",v:sal?sal.gramos:"",h:"Si cambias los gramos, la diferencia vuelve al cajón o sale de él."},
     {k:"valor",l:"Valor de la clase",t:"num",v:r.valorClase},
-    {k:"material",l:"Material",t:"num",v:r.valorMaterial},
+    {k:"material",l:"Cobro del material",t:"num",v:r.valorMaterial},
     {k:"metodo",l:"Método",t:"select",o:METODOS.map(m=>[m,m]),v:r.method},
     {k:"notas",l:"Notas",t:"text",v:r.notas}
   ],{nota:"Es un ingreso del libro general. Se corrige aquí, no en el financiero.",
-    guardar:async()=>{const f=ev("fecha"),cod=ev("clase"),al=ev("alumno"),vc=num(ev("valor")),vm=num(ev("material"));
+    guardar:async()=>{const f=ev("fecha"),cod=ev("clase"),al=ev("alumno"),mat=ev("mat"),g=num(ev("gramos")),vc=num(ev("valor")),vm=num(ev("material"));
       if(!f||!cod||!al){toast("Faltan fecha, clase o alumno");return;}
-      if(vc+vm<=0){toast("Escribe el valor de la clase o del material");return;}
-      await updateDoc(doc(db,"records",id),registroCobro(f,cod,al,vc,vm,ev("metodo"),ev("notas")));return "✓ Cobro corregido";},
-    borrar:async()=>{if(!confirm(`¿Borrar el cobro de ${money(r.amount)} a ${r.alumno||"—"}?`))return;
-      await deleteDoc(doc(db,"records",id));return "✓ Cobro borrado";}});
+      if(g>0&&!mat){toast("Elige el material que usó");return;}
+      if(vc+vm<=0){toast("Para quitar el cobro, bórralo");return;}
+      const lote=writeBatch(db);const rec=registroCobro(f,cod,al,vc,vm,ev("metodo"),ev("notas"));
+      if(g>0){const base={tipo:"salida",material:mat,gramos:g,fecha:f,destino:{tipo:"clase",codigo:cod},alumno:al,updatedAt:ahora()};
+        if(sal){if(f!==sal.fecha||mat!==sal.material)base.precioRef=costoPromedio(mat,f);lote.update(doc(db,"taller_material",sal.id),base);rec.salidaId=sal.id;}
+        else{const ref=doc(collection(db,"taller_material"));lote.set(ref,{...base,precioRef:costoPromedio(mat,f),notas:""});rec.salidaId=ref.id;}}
+      else{if(sal)lote.delete(doc(db,"taller_material",sal.id));rec.salidaId=null;}
+      lote.update(doc(db,"records",id),rec);await lote.commit();return "✓ Cobro corregido";},
+    borrar:async()=>{if(!confirm(`¿Borrar el cobro de ${money(r.amount)} a ${r.alumno||"—"}?`+(sal?` Los ${gramos(sal.gramos)} de material vuelven al cajón.`:"")))return;
+      const lote=writeBatch(db);lote.delete(doc(db,"records",id));if(sal)lote.delete(doc(db,"taller_material",sal.id));
+      await lote.commit();return "✓ Cobro borrado";}});
 }
 
 /* ---------- fechas por defecto ---------- */
-["c_fecha","s_fecha","h_fecha","m_fecha","g_fecha","k_fecha","cl_fecha","co_fecha"].forEach(id=>$(id).value=hoy());
+["c_fecha","s_fecha","h_fecha","m_fecha","g_fecha","k_fecha","cl_fecha"].forEach(id=>$(id).value=hoy());
 $("p_codigo").value=proximoCodigo("J1");
 document.documentElement.dataset.taller='listo';
 </script>
