@@ -154,7 +154,7 @@ button.plain{background:none;border:1px solid var(--line);color:var(--ink)}
         <div class="field"><label>Proveedor</label><select id="c_proveedor"></select>
           <button class="ghost" data-add="proveedores" type="button">Añadir proveedor</button></div>
         <div class="field"><label>Método</label><select id="c_metodo"></select></div>
-        <div class="field"><label>Notas</label><input type="text" id="c_notas" placeholder="factura, ley, lo que haga falta"></div>
+        <div class="field"><label>Notas</label><input type="text" id="c_notas" placeholder="factura, lo que haga falta"></div>
         <div class="field"><label>Comprobante</label><input type="file" accept="image/*" id="c_foto"><div class="thumbs" id="c_thumbs"></div></div>
         <button class="primary" id="c_guardar">Guardar compra</button>
       </div>
@@ -276,6 +276,7 @@ button.plain{background:none;border:1px solid var(--line);color:var(--ink)}
 
     <!-- ============ KARDEX ============ -->
     <section id="v-kardex" hidden>
+      <div class="card" id="unificar" hidden><h2>Unificar la plata a ley 1000</h2><div class="hint" id="unificar_txt"></div><button class="bt" id="unificar_bt" type="button">Pasar todo a plata 1000</button></div>
       <div class="card"><h2>El cajón</h2><div id="kardex"><div class="empty">Sin movimientos de material todavía.</div></div></div>
       <div class="card"><h2>Movimientos de material</h2><div class="hint">Toca un movimiento para corregirlo o borrarlo. El ajuste se corrige desde su conteo.</div><div id="kmovs"><div class="empty">Sin movimientos.</div></div></div>
       <div class="card"><h2>Conteos</h2><div id="lconteos"><div class="empty">Sin conteos.</div></div></div>
@@ -315,7 +316,8 @@ button.plain{background:none;border:1px solid var(--line);color:var(--ink)}
         <div class="glos"><b>Merma medida</b><div>La que aparece al contar el cajón y al fundir las limallas. Se compara con el 10 %: lo que midas por debajo de eso es margen tuyo.</div></div>
         <div class="glos"><b>Merma declarada</b><div>La pérdida grande y sabida, que sí se anota con su causa. No es la del día a día.</div></div>
         <div class="glos"><b>Recuperación</b><div>El barrido que se funde y vuelve a ser material. No es merma ni es compra.</div></div>
-        <div class="glos"><b>Aleación</b><div>Plata fina más liga para hacer 925: salen unos materiales y entra otro. No es una pérdida.</div></div>
+        <div class="glos"><b>Plata 1000</b><div>Toda la plata se lleva como plata 1000, que es como llega del distribuidor. No se separa por ley: la 925 que se arme en el taller sigue contándose como plata 1000, para no tener que recordar qué ley se usó.</div></div>
+        <div class="glos"><b>Aleación</b><div>Fundir metales para hacer otro: salen unos materiales y entra otro. No es una pérdida. La plata con liga no se registra aparte: sigue siendo plata 1000.</div></div>
       </div>
       <div class="card">
         <h2>Las líneas</h2>
@@ -377,9 +379,7 @@ const METODOS=["Efectivo","Transferencia","Tarjeta","Nequi","Daviplata","Pasarel
 const CAUSAS=["pulido","limado","fundición","corte","soldadura","contaminación"];
 const LINEAS=["J1","J2","E1","J"];
 const MATERIALES_DEF=[
- {codigo:"plata-925",nombre:"Plata 925",metalBase:"plata",pureza:0.925},
- {codigo:"plata-950",nombre:"Plata 950",metalBase:"plata",pureza:0.950},
- {codigo:"plata-fina",nombre:"Plata fina",metalBase:"plata",pureza:0.999},
+ {codigo:"plata-fina",nombre:"Plata 1000",metalBase:"plata",pureza:1},
  {codigo:"liga-cobre",nombre:"Liga de cobre",metalBase:"cobre",pureza:1},
  {codigo:"oro-amarillo-18k",nombre:"Oro amarillo 18k",metalBase:"oro",pureza:0.750},
  {codigo:"oro-blanco-18k",nombre:"Oro blanco 18k",metalBase:"oro",pureza:0.750},
@@ -412,7 +412,7 @@ const sumaAlPromedio=m=>{const g=Number(m.gramos)||0;return esEntrada(m)||(m.tip
 function saldo(cod){let s=0;D.material.forEach(m=>{if(m.material!==cod)return;const g=Number(m.gramos)||0;
   if(esEntrada(m))s+=g;else if(m.tipo==="salida"||m.tipo==="merma")s-=g;else if(m.tipo==="ajuste")s+=g;});return s;}
 function costoPromedio(cod,hasta){let g=0,v=0;D.material.forEach(m=>{if(m.material!==cod)return;if(hasta&&(m.fecha||"")>hasta)return;if(!sumaAlPromedio(m))return;const gg=Number(m.gramos)||0;const p=Number(m.precioRef)||0;g+=gg;v+=gg*p;});return g>0?v/g:0;}
-function precioRef(cod){const ps=D.precios.filter(p=>p.material===cod&&(p.origen==="compra"||p.origen==="consulta")).sort((a,b)=>(b.fecha||"").localeCompare(a.fecha||""));if(ps.length)return {p:Number(ps[0].precioPorGramo)||0,f:ps[0].fecha,o:ps[0].origen};const c=costoPromedio(cod);return {p:c,f:null,o:"costo promedio"};}
+function precioRef(cod){const ps=D.precios.filter(p=>p.material===cod&&!p.materialOriginal&&(p.origen==="compra"||p.origen==="consulta")).sort((a,b)=>(b.fecha||"").localeCompare(a.fecha||""));if(ps.length)return {p:Number(ps[0].precioPorGramo)||0,f:ps[0].fecha,o:ps[0].origen};const c=costoPromedio(cod);return {p:c,f:null,o:"costo promedio"};}
 const MERMA_ESTANDAR=0.10;
 const mermaDe=m=>(m&&m.mermaEstandar!==undefined)?Number(m.mermaEstandar):MERMA_ESTANDAR;
 const pctMerma=m=>Math.round(mermaDe(m)*100);
@@ -463,6 +463,46 @@ async function sembrar(){
   catch(e){toast("⚠ "+e.message);}
 }
 
+/* ---------- unificar la plata a ley 1000 ---------- */
+// Desde el 2026-10-20 toda la plata se lleva como plata 1000 (código plata-fina), mismos gramos.
+// Los movimientos de 925 y 950 se reetiquetan y guardan su ley en materialOriginal; su precioRef no cambia,
+// así que el costo promedio de la plata 1000 queda ponderado con lo que costó cada gramo.
+const PLATA_VIEJA=["plata-925","plata-950"],PLATA="plata-fina";
+const esVieja=c=>PLATA_VIEJA.includes(c);
+function pendientesPlata(){
+  const u=[];
+  D.material.forEach(m=>{const c={};if(esVieja(m.material)){c.material=PLATA;c.materialOriginal=m.material;}
+    if(m.destino&&m.destino.tipo==="material"&&esVieja(m.destino.codigo))c.destino={...m.destino,codigo:PLATA};
+    if(Object.keys(c).length)u.push(["taller_material",m.id,{...c,updatedAt:ahora()}]);});
+  D.precios.forEach(x=>{if(esVieja(x.material))u.push(["taller_precios",x.id,{material:PLATA,materialOriginal:x.material}]);});
+  D.conteos.forEach(x=>{if(esVieja(x.material))u.push(["taller_conteos",x.id,{material:PLATA,materialOriginal:x.material}]);});
+  D.piezas.forEach(x=>{if(esVieja(x.materialPrincipal))u.push(["taller_piezas",x.id,{materialPrincipal:PLATA,updatedAt:ahora()}]);});
+  D.records.forEach(r=>{if(r.linea&&LINEAS.includes(r.linea)&&r.destino&&r.destino.tipo==="material"&&esVieja(r.destino.codigo))
+    u.push(["records",r.id,{destino:{...r.destino,codigo:PLATA},updatedAt:ahora()}]);});
+  return u;
+}
+function pintarUnificar(){
+  const u=pendientesPlata(),cat=D.materiales.filter(m=>esVieja(m.codigo)),pf=D.materiales.find(m=>m.codigo===PLATA);
+  const falta=u.length||cat.length||(pf&&pf.nombre!=="Plata 1000");
+  $("unificar").hidden=!falta;if(!falta)return;
+  const g=PLATA_VIEJA.map(c=>[c,saldo(c)]).filter(x=>Math.abs(x[1])>0.0001);
+  $("unificar_txt").innerHTML=`Toda la plata se lleva ahora como <b>plata 1000</b>, con los mismos gramos. `+
+    (g.length?`Hoy hay ${g.map(x=>`<b>${gramos(x[1])}</b> de ${esc((D.materiales.find(m=>m.codigo===x[0])||{nombre:x[0]}).nombre)}`).join(" y ")} que pasan a plata 1000. `:"")+
+    `Se reetiquetan ${u.length} registro(s) y cada movimiento conserva su precio, así que el valor del cajón no cambia.`;
+}
+async function unificarPlata(){
+  const u=pendientesPlata();
+  if(!confirm(`¿Pasar toda la plata a plata 1000? Se reetiquetan ${u.length} registro(s) y se quitan la 925 y la 950 de la lista. Los gramos y el valor del cajón no cambian.`))return;
+  try{
+    const ops=u.map(([c,id,d])=>l=>l.update(doc(db,c,id),d));
+    D.materiales.filter(m=>esVieja(m.codigo)).forEach(m=>ops.push(l=>l.delete(doc(db,"taller_materiales",m.codigo))));
+    ops.push(l=>l.set(doc(db,"taller_materiales",PLATA),{codigo:PLATA,nombre:"Plata 1000",metalBase:"plata",pureza:1},{merge:true}));
+    for(let i=0;i<ops.length;i+=400){const l=writeBatch(db);ops.slice(i,i+400).forEach(f=>f(l));await l.commit();}
+    toast("Listo: toda la plata quedó como plata 1000");
+  }catch(e){toast("⚠ "+e.message);}
+}
+$("unificar_bt").addEventListener("click",unificarPlata);
+
 /* ---------- pintar ---------- */
 let formAbierto=null;
 function pintar(){
@@ -494,6 +534,8 @@ function pintar(){
   fill("p_existente",[{codigo:"",nombre:""}].concat(D.piezas),o=>o.codigo,o=>o.codigo?o.codigo+" · "+(o.nombre||""):"— nueva pieza —");
   if(!$("p_existente").value)$("p_codigo").value=proximoCodigo($("p_linea").value);
   const dl=$("lista_encargos");if(dl)dl.innerHTML=[...new Set(D.piezas.map(p=>p.encargo).filter(Boolean))].map(e=>`<option value="${esc(e)}">`).join("");
+
+  pintarUnificar();
 
   /* caja */
   const rr=D.records.filter(r=>r.linea&&LINEAS.includes(r.linea)&&r.type==="expense").sort((a,b)=>(b.date||"").localeCompare(a.date||""));
